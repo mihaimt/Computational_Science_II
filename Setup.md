@@ -16,7 +16,7 @@
 
 7. Clone the repository with:  
 
-   *git clone git@github.com:mihaimt/Computational_Science_II*
+   **git clone git@github.com:mihaimt/Computational_Science_II**
 
 Now you should be able to modify/add files in the repository. 
 # Essential commands
