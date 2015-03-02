@@ -1,7 +1,8 @@
 # Steps to complete before being able to contribute to the repository
 1. Create your GitHub account at:
    <https://github.com/> 
-2. Set up git on your machine by following the instructions at:
+2. Set up git on your machine by following the instructions at:  
+
    <https://help.github.com/articles/set-up-git/>
    (all instructions before the "Celebrate" section)
 3. Send me via mail your GitHub username so that I can add you to the contributors list 
