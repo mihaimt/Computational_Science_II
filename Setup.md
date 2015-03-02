@@ -22,9 +22,11 @@ Now you should be able to modify/add files in the repository.
 ### Essential commands that you will use from your terminal
 * **git pull**                        
 * **git add <filename>**             
-* **git commit -am "<description>"** 
-* **git push**                        
-#### Succint description:
-<https://training.github.com/kit/downloads/github-git-cheat-sheet.pdf>
-#### A book about git:
+* **git commit -am "*description*"** 
+* **git push**  
+
+### Succint description:
+<https://training.github.com/kit/downloads/github-git-cheat-sheet.pdf>  
+
+### A book about git:
 <http://git-scm.com/book/en/v2>
