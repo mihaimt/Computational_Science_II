@@ -26,6 +26,8 @@
 * **git commit -am "*description*"** 
 * **git push**  
 
+    For testing use the *Testing_git* directory.  
+  
 ### Succint description:
 <https://training.github.com/kit/downloads/github-git-cheat-sheet.pdf>  
 
