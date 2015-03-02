@@ -22,8 +22,8 @@
    
 ### Essential commands that you will use from your terminal
 * **git pull**                        
-* **git add <filename>**             
-* **git commit -am "*description*"** 
+* **git add *filename* **             
+* **git commit -am "*description*"**
 * **git push**  
 
     For testing use the *Testing_git* directory.  
