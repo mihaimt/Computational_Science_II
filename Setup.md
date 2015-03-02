@@ -29,7 +29,7 @@
 
 * **git push**  
 
-    For tests use the *Testing_git* directory.  
+    For tests on modifying/creating files use the *Testing_git* directory.  
   
 ### Succint description:
 <https://training.github.com/kit/downloads/github-git-cheat-sheet.pdf>  
