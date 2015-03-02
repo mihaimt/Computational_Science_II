@@ -1,4 +1,4 @@
-# Steps to complete before being able to contribute to the repository
+### Steps to complete before being able to contribute to the repository
 1. Create your GitHub account at:
    <https://github.com/> 
 2. Set up git on your machine by following the instructions at:  
@@ -19,5 +19,5 @@
    **git clone git@github.com:mihaimt/Computational_Science_II**
 
 Now you should be able to modify/add files in the repository. 
-# Essential commands
-. git pull   - updates the 
+### Essential commands
+* git pull   - updates the 
