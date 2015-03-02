@@ -21,12 +21,15 @@
    Now you should be able to modify/add files in the repository from your terminal.  
    
 ### Essential commands that you will use from your terminal
-* **git pull**                        
-* **git add *filename* **             
-* **git commit -am "*description*"**
+* **git pull**  
+
+* **git add *filename***  
+
+* **git commit -am "*description*"**  
+
 * **git push**  
 
-    For testing use the *Testing_git* directory.  
+    For tests use the *Testing_git* directory.  
   
 ### Succint description:
 <https://training.github.com/kit/downloads/github-git-cheat-sheet.pdf>  
