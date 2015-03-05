@@ -4,7 +4,7 @@
 - Semester: Spring 2015 
 
 ### Project Members:
-- Participants:       Tino Valentin Baechtold, Philipp Denzel, Valère Lambert, Jonas Rüegsegger, Sara Vossoughi
+- Participants:       Tino Valentin Baechtold, Philipp Denzel, Valère Lambert, Jonas Rüegsegger, Daniel Studer, Sara Vossoughi, Mihai Tomozeiu
 - Lecturers:          Clement Surville, Prasenjit Saha, George Lake
 - Teaching Assistant: Mihai Tomozeiu
 
