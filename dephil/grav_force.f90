@@ -5,7 +5,7 @@
 PROGRAM grav_force
     IMPLICIT NONE
 
-! declarations
+! DECLARATIONS
     INTEGER :: i, iprime, j, jprime
     INTEGER, PARAMETER :: N_r=128, N_theta=256
     REAL :: start, finish
@@ -57,7 +57,7 @@ PROGRAM grav_force
 !--------------------------------------------------------------------------------------
 ! CALCULATION OF THE FORCE COMPONENTS
 
-! precalculations
+! PRECALCULATIONS
 
 ! an array for all the different dr/dtheta ! now constant, but later useful
     do i = 1, N_r-1
@@ -79,7 +79,7 @@ PROGRAM grav_force
         end do
     end do
 
-
+! PROPAGATION starts here
     call CPU_TIME(start)
 ! fill the mass table
     do iprime = 1, N_r

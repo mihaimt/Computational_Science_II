@@ -14,6 +14,8 @@ theta_path = "./data/theta_project.data"
 density_path = "./data/density_project.data"
 force_r_path = "./data/f_radial.data"
 force_theta_path = "./data/f_angular.data"
+force_lvl1_r_path = "./data/f_radial_lvl1.data"
+force_lvl1_theta_path = "./data/f_angular_lvl1.data"
 
 def read_path(path):
     """
@@ -123,6 +125,52 @@ def plot_force_angular(force, r, theta):
     fig.savefig('angular_force.png')
 
 
+def plot_force_lvl1_radial(force, r, theta):
+    """
+    Plots the force on a r vs. theta plot
+    """
+    # rearrange force 1-D array to 2-D array
+    N_r = len(r)/2
+    N_theta = len(theta)/2
+    surface = force_matrix(force, N_r, N_theta)
+    # start figure
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title("force map (radial component)")
+    ax.set_xlabel('radius [r]')
+    ax.set_ylabel('azimuth')
+    # plot the 2-D array
+    cax = ax.imshow(surface, aspect='auto', origin='lower',
+              extent=[min(r)-.5*(r[1]-r[0]), max(r)-.5*(r[-1]-r[-2]), min(theta)-.5*(theta[1]-theta[0]), max(theta)-.5*(theta[-1]-theta[-2])],
+              cmap=plt.get_cmap('jet'),# interpolation='hamming', # change interpolation to None, if not wanted
+              vmin=min(force), vmax=max(force))
+    fig.colorbar(cax)
+    fig.savefig('radial_force_lvl1.png')
+
+
+def plot_force_lvl1_angular(force, r, theta):
+    """
+    Plots the force on a r vs. theta plot
+    """
+    # rearrange force 1-D array to 2-D array
+    N_r = len(r)/2
+    N_theta = len(theta)/2
+    surface = force_matrix(force, N_r, N_theta)
+    # start figure
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title("force map (angular component)")
+    ax.set_xlabel('radius [r]')
+    ax.set_ylabel('azimuth')
+    # plot the 2-D array
+    cax = ax.imshow(surface, aspect='auto', origin='lower',
+              extent=[min(r)-.5*(r[1]-r[0]), max(r)-.5*(r[-1]-r[-2]), min(theta)-.5*(theta[1]-theta[0]), max(theta)-.5*(theta[-1]-theta[-2])],
+              cmap=plt.get_cmap('jet'),# interpolation='hamming', # change interpolation to None, if not wanted
+              vmin=min(force), vmax=max(force))
+    fig.colorbar(cax)
+    fig.savefig('angular_force_lvl1.png')
+
+
 if __name__ == "__main__":
 
     # read data
@@ -131,8 +179,12 @@ if __name__ == "__main__":
     density = read_path(density_path)
     force_r = read_path(force_r_path)
     force_theta = read_path(force_theta_path)
+    force_lvl1_r = read_path(force_lvl1_r_path)
+    force_lvl1_theta = read_path(force_lvl1_theta_path)
     
     # plots
     plot_density(density, r, theta)
     plot_force_radial(force_r, r, theta)
     plot_force_angular(force_theta, r, theta)
+    plot_force_lvl1_radial(force_lvl1_r, r, theta)
+    plot_force_lvl1_angular(force_lvl1_theta, r, theta)
