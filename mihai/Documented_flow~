@@ -1,0 +1,198 @@
+\documentclass[a4paper,10pt]{article}
+%\documentclass[a4paper,10pt]{scrartcl}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{caption}
+
+\title{Optimization flow for the complete relative self gravity calculations \\ 
+      Computational Science II - University of Zurich}
+\author{Mihai Tomozeiu}
+\date{14th March 2015}
+
+\pdfinfo{%
+  /Title    ()
+  /Author   ()
+  /Creator  ()
+  /Producer ()
+  /Subject  ()
+  /Keywords ()
+}
+
+\begin{document}
+
+\maketitle
+
+
+
+\clearpage
+
+\section{Raw code - $gravity.f90$}
+
+The original code without any optimization is listed beneath:
+
+\lstinputlisting[language = Fortran]{/home/ics/mihai/git/Computational_Science_II_Open/gravity.f90}
+
+A cpu time measurement on a single core on f3 login node of zbox for the code revealed a value of $\bf{409.2 s}$. 
+
+\section{First set of pre-calculations - $gravity\_precalc.f90$}
+
+First of all, the values 128 and 256 for r and $\theta$ were assigned to the variables nr and nt 
+to allow consistent changes of these quantities in the calculation 'for's.
+The mass map $mass(k,l)$ associated with the grid was computed prior to the main 'four-for':
+
+\lstinputlisting[language = Fortran, firstline = 82, lastline = 88 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc.f90}
+Next, all simple and complex trigonometric functions found inside the four-for were pre-computed:
+\lstinputlisting[language = Fortran, firstline = 63, lastline = 73 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc.f90}
+Moreover, the value of the radii at the corners were determined using one for:
+\lstinputlisting[language = Fortran, firstline = 76, lastline = 78 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc.f90}
+
+With the use of the pre-calculated quantities, the main part was transformed into:
+\lstinputlisting[language = Fortran, firstline = 89, lastline = 117 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc.f90}
+
+The measured cpu time for the resulting $\bf{gravity_precalc.f90}$ was $\bf{235 s}$. Thus, the use of the first set of precomputed quantities led to a reductio
+of the cpu time of $43\%$.
+
+\section{Reformulation of the acceleration calculations - $gravity\_reduct.f90$ }
+
+The next step is to rewrite the acceleration equations in terms of radial ratio $radius(k)/radius\_corn(i)$.
+
+\lstinputlisting[language = Fortran, firstline = 100, lastline = 109 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_reduct.f90}
+
+Since for this step no precalculations and operation optimization were done the cpu time associated to the calculations
+grew by 6\% to the value of 249 s. The time increase is due to the extra operations introduced, including the extra divisions which are slow.
+In the next two sections time cost improvements were made with another wave of precalculated quantities and a reduction of the number of calculations per cell.
+
+\section{Second set of pre-calculations - $gravity\_precalc\_2.f90$}
+
+The ratio of the radii defined as $R = radius(k)/radius\_corn(i)$ appears in the acceleration calculations as standalone or its square. Moreover, the square appears
+only when added to unity therefore the addition of one was removed from the four-for and included in the precalculation fors
+over k and i.
+
+\lstinputlisting[language = Fortran, firstline = 92, lastline = 97 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_2.f90}
+
+Moreover, the multiplication by a factor of two with the cosine difference was introduced into the precalculation fors:
+
+\lstinputlisting[language = Fortran, firstline = 70, lastline = 74 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_2.f90}
+
+The previous modifications bring the acceleration part of the code to the following form:
+
+\lstinputlisting[language = Fortran, firstline = 109, lastline = 118 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_2.f90}
+
+These changes lead to a minor reduction of the computational time by 3\% to $\bf{242 s}$.
+
+\section{First operation optimization - $gravity\_optimiz.f90$}
+In this step the greatest improvement in the computational time was achieved. The acceleration calculation part was
+transformed into:
+
+\lstinputlisting[language = Fortran, firstline = 110, lastline = 125 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_optimiz.f90}
+First of all the redundant double operations were removed. What is common to both projections of accelerations was calculated separately and then 
+introduced in the acceleration equations. In the denominator there are a quadratic function in terms of the ratio and the square of the corner radius
+(i). The inverse of the square of the corner radius was precomputed in order to remove the time consuming divisions and the extra square. This was
+easily done with a single for along the radius indices:
+
+\lstinputlisting[language = Fortran, firstline = 78, lastline = 81 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_optimiz.f90}
+
+The same for as the one precomputing the corner radii was used. The quadratic function dependent on all four indices was first computed and assigned to
+variable $rad$. Next the quantity was multiplied with its square root to avoid the direct $3/2$ power law. Next it was inverted and assigned to variable 
+$den\_inv$. The value then was multimplied with $mass(k,l)$ and the inverted square corner radius. This multiplication
+assigned to variable $com$ was used as a prefactor in computing the values of the projections of the acceleration.  
+
+The computational time was reduced by 91\% to $\bf{22.8 s}$. The main contribution to the improvement is the minimization of the number of divisions in the 
+four-for. 
+
+\section{Exploiting the trigonometric symmetry - $gravity\_theta\_symmetry.f90$}
+
+In this section the length of one of the four-fors is halved (the first for along the values of theta). This decrease of the number of steps can be done by
+exploiting the following trigonometric identities:
+\begin{equation}
+ cos(\theta+\pi) = cos(\theta)\cdot cos(\pi) - sin(\theta)\cdot sin(\pi) = -cos(\theta)
+\end{equation}
+\begin{equation}
+ sin(\theta+\pi) = sin(\theta)\cdot cos(\pi) + sin(\pi)\cdot cos(\theta) = -sin(\theta)
+\end{equation}
+Thus, the difference in the calculations of two values of $\theta$ different by $\pi$ is a set of factors of $-1$.  
+
+The four-for has the following form:
+
+\lstinputlisting[language = Fortran, firstline = 101, lastline = 160 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_theta_symmetry.f90}
+
+With the j-for halved, the values associated with j in $\left[nt/2+1.. nt \right]$ are computed along with the ones from the first half by changing the sign in front of any
+term containing a $sin$ or $cos$ trigonometric function of a linear function in $\theta(j)$. This change brings a decrease of the computational time equal to
+3\% of the previous version cpu-time. The value of the time needed to complete the calculations was $\bf{22.1 s}$.
+
+\section{Third set of precalcutations - $gravity\_precalc\_3.f90$}
+In the previous changes made to the code that implied precalculations of quantities, the sets were limited to a for or two. In the current
+section, three-fors are used for precalculations of some common quantities. 
+
+\lstinputlisting[language = Fortran, firstline = 101, lastline = 114 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_3.f90}
+One of the quantities has the units of a surface density, it is effectively the mass of the cell divided by the square of the radius at the corner i.
+The other two are parts of the projections which are independent of j.
+
+With these values precomputed the resulting computations inside the four-for are:
+
+\lstinputlisting[language = Fortran, firstline = 128, lastline = 154 ]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_3.f90}
+
+These changes further reduce the computational time by 13\% to a value of $\bf{19.3 s}$.
+
+\section{Second optimization - $gravity\_optimiz\_2.f90$}
+
+For the final optimization the core product of the four-for $ prod    = ratio(k,i)*cos\_diff(l,j) $
+common to all four projection calculations has been computed prior to the $rad$ quantity estimate. 
+
+This change avoids an extra multiplication and reduces the cpu time by 5\%. The final measured value for the computing time
+was $\bf{18.3 s}$.
+
+The final form of the entire code can be seen in the following pages:
+
+\lstinputlisting[language = Fortran]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_optimiz_2.f90}
+
+\section{Summary of time measurements, number of operations and results}
+
+The results of the $gravity\_optimiz\_2.f90$ code are displayed in the figure 1. 
+
+
+\begin{figure}
+\centering
+\includegraphics[width = .4\textwidth]{./acc_r_polar.png}
+\includegraphics[width = .4\textwidth]{./acc_t_polar.png}  
+\includegraphics[width = .4\textwidth]{./acc_r_linear.png}  
+\includegraphics[width = .4\textwidth]{./acc_t_linear.png}
+\includegraphics[width = .4\textwidth]{./colorbar_acc_r.png}  
+\includegraphics[width = .4\textwidth]{./colorbar_acc_t.png}  
+
+\caption{\label{fig:collage} The results of $gravity\_optimiz\_2.f90$ are displayed. The first/second column corresponds to the radial/tangetial component of the 
+acceleration due to relative self-gravity. First row displayes the values on a polar map, while the second displays them on a rectangular grid for easier visualization. }
+\end{figure}
+
+\clearpage
+
+The operations counts for the last version of the code are enummerated in table 1. Finally the changes of the cpu time for the evolving code can be seen in figure 2. 
+
+\begin{center}
+\begin{table}
+\caption{\label{table:halo_prop}Occurances of the mathematical operations and number of variable assignments (var) that depend on the number of angles and radii.}
+    \begin{tabular}{ | l | l | p{5cm} |}
+    \hline
+    Operation type & Number count  \\ \hline
+    + & $\frac{7}{2} \cdot N_r^2 \cdot N_t^2 + N_r \cdot N_t +N_r^2 + N_t^2 + 2 \cdot N_t$ \\ \hline
+    - & $\frac{3}{2} \cdot N_r^2 \cdot N_t^2 + N_r \cdot N_t + N_t^2$  \\ \hline
+    * & $\frac{7}{2} \cdot N_r^2 \cdot N_t^2 + 3 \cdot N_r^2 \cdot N_t + 6 \cdot N_r \cdot N_t +N_r^2 + N_t^2 + N_r$ \\ \hline
+    / & $ N_r^2 \cdot N_t^2 + N_r^2 +  N_r$\\ \hline
+    cos & $2 \cdot N_t$\\ \hline
+    sin &   $ 2 \cdot N_t$\\ \hline
+    sqrt & $ N_r^2 \cdot N_t^2$ \\ \hline
+    var & $\frac{11}{2} \cdot N_r^2 \cdot N_t^2 + 3 \cdot N_r^2 \cdot N_t + 5 \cdot N_r \cdot N_t +2\cdot N_r^2 + N_t^2 + 4 \cdot N_t + 2 \cdot N_r$  \\ \hline
+    \end{tabular}
+\end{table}
+\end{center}
+
+
+
+\begin{figure}
+ \centering
+\includegraphics[width = .8\textwidth]{./time_plot.png}
+\caption{\label{fig:time} The computing time for each version of the code run on zbox f3 is presented in a logarithmic plot.}
+\end{figure}
+\end{document}

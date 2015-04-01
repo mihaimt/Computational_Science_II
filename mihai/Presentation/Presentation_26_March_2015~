@@ -1,0 +1,195 @@
+\documentclass{beamer}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{default}
+
+
+\usepackage[utf8x]{inputenc}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{caption}
+
+\newcommand\Fontvi{\fontsize{6}{7.2}\selectfont}
+
+
+\title{Optimization flow for the complete relative self gravity calculations}
+\subtitle{Computational Science II - University of Zurich}
+\author{Mihai Tomozeiu}
+\date{14th March 2015}
+
+\pdfinfo{%
+  /Title    ()
+  /Author   ()
+  /Creator  ()
+  /Producer ()
+  /Subject  ()
+  /Keywords ()
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}
+ \frametitle{Contents}
+\begin{itemize}
+\item Raw code; 
+\item Precalculations, reduction and symmetry;
+\item Final code; 
+\item Results;
+\item Time measurements and numbers of operations.
+\end{itemize}
+
+
+
+\begin{figure}
+%\left
+\includegraphics[width = .4\textwidth]{../Overdensity_linear.png}
+\includegraphics[width = .4\textwidth]{../Overdensity_polar.png}    
+
+%\caption{\label{fig:collage} The first/second column corresponds to the radial/tangetial component of the 
+%acceleration due to relative self-gravity. First row displayes the values on a polar map, while the second displayes them on a rectangular grid for easier visualization. }
+\end{figure}
+
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Raw code}
+\Fontvi
+
+
+\begin{equation}
+ \vec{a}_r^g(i,j) = - G \cdot \Delta r \cdot \Delta \theta \cdot \sum_{k=1}^{N_r} \sum_{l=1}^{N_t} \frac{\sigma(k,l) 
+\left[ r_c(i) - r(k)\cdot \left( cos (\theta_c(j) - \theta(l) \right) \right]}
+{\left[   r_c(i)^2 + r(k)^2 - 2\cdot r_c(i)   \cdot r(k) \cdot cos \left( \theta_c(j) - \theta(l) \right)    \right]^{3/2}}
+%{\left( r_c(i)^2 + r(k)^2 - 2\cdot r_c(i)  \cdot r(k) \cdot cos \left(\theta_c(j) - \theta(l) \right)}
+\end{equation}
+ 
+\begin{equation}
+ \vec{a}_{\theta}^g(i,j) = - G \cdot \Delta r \cdot \Delta \theta \cdot \sum_{k=1}^{N_r} \sum_{l=1}^{N_t} \frac{\sigma(k,l) 
+\left[  r(k)\cdot \left( sin (\theta_c(j) - \theta(l) \right) \right]}
+{\left[   r_c(i)^2 + r(k)^2 - 2\cdot r_c(i)   \cdot r(k) \cdot cos \left( \theta_c(j) - \theta(l) \right)    \right]^{3/2}}
+%{\left( r_c(i)^2 + r(k)^2 - 2\cdot r_c(i)  \cdot r(k) \cdot cos \left(\theta_c(j) - \theta(l) \right)}
+\end{equation}
+
+
+
+\end{frame}
+\begin{frame}
+
+\frametitle{Raw code}
+
+\Fontvi
+
+\lstinputlisting[language = Fortran, firstline = 52, lastline = 81]{/home/ics/mihai/git/Computational_Science_II_Open/gravity.f90}
+
+
+
+\end{frame}
+\begin{frame}
+\frametitle{Precalculations, reduction and symmetry}
+\framesubtitle{Mathematical reformulation}
+
+\Fontvi
+
+\begin{equation}
+ \vec{a}_r^g(i,j) = - G \cdot \Delta r \cdot \Delta \theta \cdot \sum_{k=1}^{N_r} \sum_{l=1}^{N_t} \frac{\sigma(k,l) 
+\left[ \frac{r_c(i)}{ r(k)} - \left( cos (\theta_c(j) - \theta(l) \right) \right]}
+{r(k)^2\    \left[ 1 + \frac{r_c(i)^2}{r(k)^2} - 2\cdot \frac{r_c(i)}{r(k)} \cdot cos \left( \theta_c(j) - \theta(l) \right)    \right]^{3/2}}
+%{\left( r_c(i)^2 + r(k)^2 - 2\cdot r_c(i)  \cdot r(k) \cdot cos \left(\theta_c(j) - \theta(l) \right)}
+\end{equation}
+
+\begin{equation}
+ \vec{a}_r^g(i,j) = - G \cdot \Delta r \cdot \Delta \theta \cdot \sum_{k=1}^{N_r} \sum_{l=1}^{N_t} \frac{\sigma(k,l) 
+ \left( sin (\theta_c(j) - \theta(l) \right)}
+{r(k)^2\    \left[ 1 + \frac{r_c(i)^2}{r(k)^2} - 2\cdot \frac{r_c(i)}{r(k)} \cdot cos \left( \theta_c(j) - \theta(l) \right)    \right]^{3/2}}
+%{\left( r_c(i)^2 + r(k)^2 - 2\cdot r_c(i)  \cdot r(k) \cdot cos \left(\theta_c(j) - \theta(l) \right)}
+\end{equation}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Precalculations, reduction and symmetry}
+\framesubtitle{Symmetry}
+
+
+Precompute
+\begin{itemize}
+ \item $\frac{r_c(i)}{r(k)}$
+ \item $\frac{r_c(i)^2}{r(k)^2}$
+ \item $\frac{1}{r(k)^2}$
+ \item $cos \left( \theta_c(j) - \theta(l) \right)$
+ \item $sin \left( \theta_c(j) - \theta(l) \right)$
+ \item other $N_\theta \cdot N_r$, $N_r^2$, $N_\theta^2$
+\end{itemize}
+Symmetry
+\begin{itemize}
+ \item $cos(\alpha + \pi) = -cos(\alpha)$
+ \item $sin(\alpha + \pi) = -sin(\alpha)$
+\end{itemize}
+
+Reduce the number of calculations
+
+
+\end{frame}
+
+\begin{frame}
+ \frametitle{Final code}
+ \Fontvi
+
+\lstinputlisting[language = Fortran, firstline = 121, lastline = 143]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_memory.f90}
+
+\end{frame}
+
+\begin{frame}
+ \frametitle{Final code}
+ \Fontvi
+
+\lstinputlisting[language = Fortran, firstline = 144, lastline = 166]{/home/ics/mihai/git/Computational_Science_II_Open/gravity_memory.f90}
+
+\end{frame}
+
+
+\begin{frame}
+ \frametitle{Results}
+
+\begin{figure}
+%\left
+\includegraphics[width = .5\textwidth]{../Radial_acceleration_linear.png}
+\includegraphics[width = .5\textwidth]{../Tangential_acceleration_linear.png} 
+\newline   
+\includegraphics[width = .5\textwidth]{../Radial_acceleration_polar.png}
+\includegraphics[width = .5\textwidth]{../Tangential_acceleration_polar.png}
+%\caption{\label{fig:collage} The first/second column corresponds to the radial/tangetial component of the 
+%acceleration due to relative self-gravity. First row displayes the values on a polar map, while the second displayes them on a rectangular grid for easier visualization. }
+\end{figure}
+
+\end{frame}
+
+\begin{frame}
+ \frametitle{Time measurements and number of calculations}
+\begin{figure}
+ \includegraphics[width = .5\textwidth]{../time_plot.png}
+\end{figure}
+
+\begin{center}
+\begin{table}
+\caption{\label{table:halo_prop} Number of operations $\times \frac{N_r^2 \cdot N_{\theta}^2}{2}$}
+    \begin{tabular}{ | l | l | l | l | l | l | l | l | l |   p{5cm} |}
+    \hline
+    Operation type & + & - & *  & / & cos & sin & ** & var \\ \hline
+    Raw            &26 & 14 & 30 & 24& 3   & 1   & 6  & 2  \\ \hline
+    Final          &5  & 3 & 10 & 2 & 0   & 0   & 0  &11  \\ \hline
+    \end{tabular}
+\end{table}
+\end{center}
+
+
+
+\end{frame}
+
+
+
+\end{document}
