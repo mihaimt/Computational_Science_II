@@ -19,7 +19,7 @@ force_lvl1_theta_path = "./data/f_angular_lvl1.data"
 
 def read_path(path):
     """
-    Reads r's and stores it in a 1-D list/array as floats
+    Reads data and stores it in a 1-D list/array as floats
     """
     # open data
     d_data = open(path, 'r')
@@ -56,7 +56,7 @@ def force_matrix(force, N_r, N_theta):
     return surface
 
 
-def plot_density(density, r, theta):
+def plot_density(density, r, theta, name):
     """
     Plots the density on a r vs. theta plot
     """
@@ -76,10 +76,10 @@ def plot_density(density, r, theta):
               cmap=plt.get_cmap('jet'),# interpolation='hamming', # change interpolation to None, if not wanted
               vmin=min(density), vmax=max(density))
     fig.colorbar(cax)
-    fig.savefig('density.png')
+    fig.savefig(name)
 
 
-def plot_force_radial(force, r, theta):
+def plot_force_radial(force, r, theta, name):
     """
     Plots the force on a r vs. theta plot
     """
@@ -99,10 +99,10 @@ def plot_force_radial(force, r, theta):
               cmap=plt.get_cmap('jet'),# interpolation='hamming', # change interpolation to None, if not wanted
               vmin=min(force), vmax=max(force))
     fig.colorbar(cax)
-    fig.savefig('radial_force.png')
+    fig.savefig(name)
 
 
-def plot_force_angular(force, r, theta):
+def plot_force_angular(force, r, theta, name):
     """
     Plots the force on a r vs. theta plot
     """
@@ -122,53 +122,7 @@ def plot_force_angular(force, r, theta):
               cmap=plt.get_cmap('jet'),# interpolation='hamming', # change interpolation to None, if not wanted
               vmin=min(force), vmax=max(force))
     fig.colorbar(cax)
-    fig.savefig('angular_force.png')
-
-
-def plot_force_lvl1_radial(force, r, theta):
-    """
-    Plots the force on a r vs. theta plot
-    """
-    # rearrange force 1-D array to 2-D array
-    N_r = len(r)/2
-    N_theta = len(theta)/2
-    surface = force_matrix(force, N_r, N_theta)
-    # start figure
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.set_title("force map (radial component)")
-    ax.set_xlabel('radius [r]')
-    ax.set_ylabel('azimuth')
-    # plot the 2-D array
-    cax = ax.imshow(surface, aspect='auto', origin='lower',
-              extent=[min(r)-.5*(r[1]-r[0]), max(r)-.5*(r[-1]-r[-2]), min(theta)-.5*(theta[1]-theta[0]), max(theta)-.5*(theta[-1]-theta[-2])],
-              cmap=plt.get_cmap('jet'),# interpolation='hamming', # change interpolation to None, if not wanted
-              vmin=min(force), vmax=max(force))
-    fig.colorbar(cax)
-    fig.savefig('radial_force_lvl1.png')
-
-
-def plot_force_lvl1_angular(force, r, theta):
-    """
-    Plots the force on a r vs. theta plot
-    """
-    # rearrange force 1-D array to 2-D array
-    N_r = len(r)/2
-    N_theta = len(theta)/2
-    surface = force_matrix(force, N_r, N_theta)
-    # start figure
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.set_title("force map (angular component)")
-    ax.set_xlabel('radius [r]')
-    ax.set_ylabel('azimuth')
-    # plot the 2-D array
-    cax = ax.imshow(surface, aspect='auto', origin='lower',
-              extent=[min(r)-.5*(r[1]-r[0]), max(r)-.5*(r[-1]-r[-2]), min(theta)-.5*(theta[1]-theta[0]), max(theta)-.5*(theta[-1]-theta[-2])],
-              cmap=plt.get_cmap('jet'),# interpolation='hamming', # change interpolation to None, if not wanted
-              vmin=min(force), vmax=max(force))
-    fig.colorbar(cax)
-    fig.savefig('angular_force_lvl1.png')
+    fig.savefig(name)
 
 
 if __name__ == "__main__":
@@ -183,8 +137,8 @@ if __name__ == "__main__":
     force_lvl1_theta = read_path(force_lvl1_theta_path)
     
     # plots
-    plot_density(density, r, theta)
-    plot_force_radial(force_r, r, theta)
-    plot_force_angular(force_theta, r, theta)
-    plot_force_lvl1_radial(force_lvl1_r, r, theta)
-    plot_force_lvl1_angular(force_lvl1_theta, r, theta)
+    plot_density(density, r, theta, 'density.png')
+    plot_force_radial(force_r, r, theta, 'radial_force.png')
+    plot_force_angular(force_theta, r, theta, 'angular_force.png')
+    plot_force_radial(force_lvl1_r, r, theta, 'radial_force_lvl1.png')
+    plot_force_angular(force_lvl1_theta, r, theta, 'angular_force_lvl1.png')
