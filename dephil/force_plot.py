@@ -16,6 +16,9 @@ force_r_path = "./data/f_radial.data"
 force_theta_path = "./data/f_angular.data"
 force_lvl1_r_path = "./data/f_radial_lvl1.data"
 force_lvl1_theta_path = "./data/f_angular_lvl1.data"
+force_lvl2_r_path = "./data/f_radial_lvl2.data"
+force_lvl2_theta_path = "./data/f_angular_lvl2.data"
+
 
 def read_path(path):
     """
@@ -135,6 +138,8 @@ if __name__ == "__main__":
     force_theta = read_path(force_theta_path)
     force_lvl1_r = read_path(force_lvl1_r_path)
     force_lvl1_theta = read_path(force_lvl1_theta_path)
+    force_lvl2_r = read_path(force_lvl2_r_path)
+    force_lvl2_theta = read_path(force_lvl2_theta_path)
     
     # plots
     plot_density(density, r, theta, 'density.png')
@@ -142,3 +147,5 @@ if __name__ == "__main__":
     plot_force_angular(force_theta, r, theta, 'angular_force.png')
     plot_force_radial(force_lvl1_r, r, theta, 'radial_force_lvl1.png')
     plot_force_angular(force_lvl1_theta, r, theta, 'angular_force_lvl1.png')
+    plot_force_radial(force_lvl2_r, r, theta, 'radial_force_lvl2.png')
+    plot_force_angular(force_lvl2_theta, r, theta, 'angular_force_lvl2.png')

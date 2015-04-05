@@ -28,11 +28,11 @@ PROGRAM grav_force_lvl1
     REAL :: start, finish
 !--------------------------------------------------------------------------------------
 ! READ IN FILES
-    open(unit=8, file='./data/r_project.data', status='old', action='read')
-    open(unit=9, file='./data/theta_project.data', status='old', action='read')
-    open(unit=10, file='./data/density_project.data', status='old', action='read')
-    open(unit=11, file='./data/f_radial_lvl1.data', status='old', action='write')
-    open(unit=12, file='./data/f_angular_lvl1.data', status='old', action='write')
+    open(unit=8, file='/home/dephil/grav_project/data/r_project.data', status='old', action='read')
+    open(unit=9, file='/home/dephil/grav_project/data/theta_project.data', status='old', action='read')
+    open(unit=10, file='/home/dephil/grav_project/data/density_project.data', status='old', action='read')
+    open(unit=11, file='/home/dephil/grav_project/data/f_radial_lvl1.data', status='old', action='write')
+    open(unit=12, file='/home/dephil/grav_project/data/f_angular_lvl1.data', status='old', action='write')
 
 ! read in LEVEL ZERO ------------------
 ! read <radii> into 1-D array for LEVEL0
@@ -205,9 +205,9 @@ PROGRAM grav_force_lvl1
     close(unit=12)
 
 ! difference of the forces
-!    open(unit=13, file='./data/f_radial_diff0to1.data', status='old', action='write')
-!    open(unit=14, file='./data/f_radial.data', status='old', action='read')
-!    open(unit=15, file='./data/f_radial_lvl1.data', status='old', action='read')
+!    open(unit=13, file='/home/dephil/grav_project/data/f_radial_diff0to1.data', status='old', action='write')
+!    open(unit=14, file='/home/dephil/grav_project/data/f_radial.data', status='old', action='read')
+!    open(unit=15, file='/home/dephil/grav_project/data/f_radial_lvl1.data', status='old', action='read')
 
 !    do i = 1, N_r0*N_theta0
 !        read(14, '(e20.10)') f_r
