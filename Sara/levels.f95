@@ -1,14 +1,8 @@
 program gravity
-  !  optimised 
-  !  using cosine and sin caching of variables without symmetry
-  !  caching any available values outside the loops
-  !  f95 -O3 sim_nosym_step.f95 -o sim_nosym_step && ./sim_nosym_step
-  !  5 trials
-!      Time:      11.900193000000000      s
-!      Time:      11.958933000000000      s
-!      Time:      11.997919999999999      s
-!      Time:      11.930999000000000      s
-!      Time:      11.898399999999999      s
+  !  optimised with -O2
+  !  2 trials
+!      Time:      3.6949229999999997      s
+!      Time:      3.6917869999999997      s
           
   implicit none             ! all variables must be defined
   real(8) t_init, t_end     ! global timing
@@ -17,7 +11,7 @@ program gravity
   integer, parameter :: N_r = 128
   integer, parameter :: N_theta = 256
   real(8), parameter :: epsilonCos = 1d-8
-  integer, parameter :: level = 3
+  integer, parameter :: level = 1
   integer, parameter :: level_mult = 2 ** level
   real(8), parameter :: eps = 1e-6
   ! run-time variables
