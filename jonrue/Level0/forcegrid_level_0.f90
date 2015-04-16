@@ -45,17 +45,17 @@ dim_theta=256
 call CPU_Time(t1)
 
 !Begin: Read in Data.........................................................
-open(unit=1,file="r_project.data")
+open(unit=1,file="../density/r_project.data")
 do i=1,dim_r
 	read (1,'(e20.10)') r_prime(i)
 end do
 close(1)
-open(unit=2,file="theta_project.data")
+open(unit=2,file="../density/theta_project.data")
 do i=1,dim_theta
 	read(2,'(e20.10)') theta_prime(i)
 end do
 close(2)
-open(unit=3,file="density_project.data")
+open(unit=3,file="../density/density_project.data")
 do i=1,dim_r
 	do j=1,dim_theta
 	read(3,'(e20.10)') density_grid(i,j)
@@ -64,6 +64,7 @@ end do
 close(3)
 !End: Read in Data........................................................
 
+write(*,*) theta_prime(1)
 
 delta_r=r_prime(2)-r_prime(1) 
 delta_theta=theta_prime(2)-theta_prime(1)
@@ -127,8 +128,8 @@ call cpu_time(t3)
 write(*,*) t3-t1
 write(*,*) t3-t2
 
-open(unit=4,file="forcegrid.txt")
-open(unit=5,file="forcegrid2.txt")
+open(unit=4,file="../output/forcegrid.txt")
+open(unit=5,file="../output/forcegrid2.txt")
 do i=1,256
 	do j=1,128
 		write(4,'(e20.10)') force_grid_r(j,i)
