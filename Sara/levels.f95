@@ -1,4 +1,4 @@
-program ex1
+program gravity
   !  optimised 
   !  using cosine and sin caching of variables without symmetry
   !  caching any available values outside the loops
@@ -17,7 +17,9 @@ program ex1
   integer, parameter :: N_r = 128
   integer, parameter :: N_theta = 256
   real(8), parameter :: epsilonCos = 1d-8
-  integer, parameter :: level = 1
+  integer, parameter :: level = 2
+  integer, parameter :: level_mult = 2 ** level
+  real(8), parameter :: eps = 1e-6
   ! run-time variables
   real(8) :: a,r,r2, theta, r_step, theta_step, r_p, theta_p, force_mag_temp, surface_area, d_rd_theta, force_denominator
 
@@ -31,7 +33,13 @@ program ex1
 
   !cache and lookup variables
   real(8) :: cosvar, sinvar, cosCache(0:N_theta-1), sinCache(0:N_theta-1)
-  
+ 
+  !size of the inner loop, assume start at 0
+  integer, parameter :: inner_loop_size = ((N_r / level_mult) * (N_theta / level_mult)) - 1
+
+  ! temp variables
+  integer :: r_lookup
+
   write (*,*) 'Program Start ', ' ... '
   write (*,*) 'Data read ...'
   call readFile("r_project.data", r_prime)
@@ -55,10 +63,10 @@ program ex1
   ! Compute the mass at level_0
   do out_i=0, (N_r*N_theta)-1
     r = r_prime(out_i/N_theta)
-    mass(out_i) = sigma(i)*r*d_rd_theta
+    mass(out_i) = sigma(out_i)*r*d_rd_theta
   end do
 
-  increaseLevel(mass, N_r, N_theta, level)
+  call increaseLevel(mass, N_r, N_theta, level)
 
   ! out_i: index to output grid
   do out_i=0, (N_r*N_theta)-1          
@@ -68,15 +76,25 @@ program ex1
     r2=r*r                                                          !putting into memory causes slowdown
     force_r(out_i)=0
     force_theta(out_i)=0
-    do in_i=0, (N_r*N_theta)-1 
-      r_p = r_prime(in_i/N_theta)                                   ! current r-prime
-      theta_p = theta_prime(MODULO(in_i, N_theta))                  ! current theta-prime
-      cosvar = cosCache(IAND(in_i-out_i, N_theta-1))  ! no significant change
-      sinvar = sinCache(IAND(in_i-out_i, N_theta-1))  ! possibility for optimization?
+    do in_i=0, inner_loop_size
+      ! current r-prime is the average of the min and max r-prime of the level
+      r_lookup = in_i / (N_theta/level_mult)
+      r_p = (r_prime(r_lookup * level_mult) + &
+             r_prime((r_lookup+1) * level_mult - 1)) * 0.5
+      ! current theta-prime
+      theta_p = (theta_prime(MODULO(in_i*level_mult, N_theta)) + &
+                 theta_prime(MODULO((in_i+1)*level_mult - 1, N_theta))) * 0.5
+      
+      !cosvar = cosCache(MODULO(in_i*level_mult-out_i, N_theta))  
+      !sinvar = sinCache(MODULO(in_i*level_mult-out_i, N_theta))
+      ! TODO: fix cosine lookup
+      cosvar = cos(theta_p - theta)
+      sinvar = sin(theta_p - theta)
 
       force_denominator = (r2+r_p*r_p-(2*r*r_p*cosvar))
-      force_denominator = sqrt(force_denominator*force_denominator*force_denominator)
-      force_mag_temp = (G*sigma(in_i)/(force_denominator)) * d_rd_theta
+      force_denominator = sqrt(force_denominator)*force_denominator + eps
+
+      force_mag_temp = mass(in_i)/force_denominator
       force_r(out_i) = (r - r_p*cosvar) * force_mag_temp + force_r(out_i)
       force_theta(out_i) = (r_p*sinvar) * force_mag_temp + force_theta(out_i)
     end do
@@ -95,28 +113,30 @@ program ex1
 contains 
 
   subroutine increaseLevel(mass, N_r, N_theta, level)
-    
+    real(8) :: mass(:)          ! In place replacement of array. Replace Level L with L+level
+    integer :: N_r, N_theta, level  ! N_r and N_theta are sizes of input data
+    integer :: in_N_r, in_N_t, out_N_r, out_N_t ! size of the array at old and new level
+    integer :: i, r, t          ! iterator variables
+    in_N_r = N_r
+    in_N_t = N_theta
 
+    do i = 1, level
+      out_N_r = in_N_r/2
+      out_N_t = in_N_t/2    
+        
+      do r = 0, out_N_r-1
+        do t = 0, out_N_t-1
+          mass(t+out_N_t*r) = mass(2*t +     (in_N_t*2*r)) + &
+                              mass(2*t + 1 + (in_N_t*2*r)) + &
+                              mass(2*t +     (in_N_t*(2*r + 1))) + &
+                              mass(2*t + 1 + (in_N_t*(2*r + 1)))
+        end do
+      end do
+        
+      in_N_r = out_N_r
+      in_N_t = out_N_t
+    end do
   end subroutine increaseLevel
-
-  real(8) function cosFast(x)
-    integer :: x, y
-    y = MODULO(x, N_theta)
-    IF (y < N_theta/4) THEN
-        cosFast = cosCache(y)
-    ELSE IF (y < N_theta/2) THEN
-        cosFast = -cosCache((N_theta/2-y) -1)
-    ELSE IF (y < 3*N_theta/4) THEN
-        cosFast = -cosCache(y - N_theta/2 )
-    ELSE 
-        cosFast = cosCache(N_theta-y -1)
-    END IF
-  end function cosFast
-
-  real(8) function sinFast(x)
-    integer :: x
-    sinFast = cosFast(x - N_theta/4)
-  end function sinFast
 
   subroutine readFile(filename, x)
     character(*) :: filename
@@ -147,4 +167,4 @@ contains
     close(8)
   end subroutine writeFile
 
-end program ex1
+end program gravity
