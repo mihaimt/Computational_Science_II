@@ -17,7 +17,7 @@ program gravity
   integer, parameter :: N_r = 128
   integer, parameter :: N_theta = 256
   real(8), parameter :: epsilonCos = 1d-8
-  integer, parameter :: level = 2
+  integer, parameter :: level = 3
   integer, parameter :: level_mult = 2 ** level
   real(8), parameter :: eps = 1e-6
   ! run-time variables
@@ -46,17 +46,17 @@ program gravity
   call readFile("theta_project.data", theta_prime)
   call readFile("density_project.data", sigma)
   write (*,*) 'Data read done.'
-   
-  ! pre-compute the cache for all theta differences that occur, for N_theta/4 values of N_theta
-  do theta_i=0, (N_theta)-1
-    cosCache(theta_i) = cos((theta_i+0.5)*theta_step)
-    sinCache(theta_i) = sin((theta_i+0.5)*theta_step)
-  end do
 
   ! grid is regular, all step sizes are equal
   r_step = r_prime(1) - r_prime(0)                
   theta_step = theta_prime(1) - theta_prime(0)  
   d_rd_theta = r_step * theta_step ! precalculate dtheta*dr
+   
+  ! pre-compute the cache for all theta differences that occur, for N_theta/4 values of N_theta
+  do theta_i=0, (N_theta)-1
+    cosCache(theta_i) = cos((theta_i+ (0.5 * level_mult))*theta_step)
+    sinCache(theta_i) = sin((theta_i+ (0.5 * level_mult))*theta_step)
+  end do
 
   call CPU_TIME(t_init)
 
@@ -85,11 +85,8 @@ program gravity
       theta_p = (theta_prime(MODULO(in_i*level_mult, N_theta)) + &
                  theta_prime(MODULO((in_i+1)*level_mult - 1, N_theta))) * 0.5
       
-      !cosvar = cosCache(MODULO(in_i*level_mult-out_i, N_theta))  
-      !sinvar = sinCache(MODULO(in_i*level_mult-out_i, N_theta))
-      ! TODO: fix cosine lookup
-      cosvar = cos(theta_p - theta)
-      sinvar = sin(theta_p - theta)
+      cosvar = cosCache(MODULO(in_i*level_mult-out_i, N_theta))  
+      sinvar = sinCache(MODULO(in_i*level_mult-out_i, N_theta))
 
       force_denominator = (r2+r_p*r_p-(2*r*r_p*cosvar))
       force_denominator = sqrt(force_denominator)*force_denominator + eps
