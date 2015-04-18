@@ -18,7 +18,8 @@ force_lvl1_r_path = "./data/f_radial_lvl1.data"
 force_lvl1_theta_path = "./data/f_angular_lvl1.data"
 force_lvl2_r_path = "./data/f_radial_lvl2.data"
 force_lvl2_theta_path = "./data/f_angular_lvl2.data"
-
+force_lvl3_r_path = "./data/f_radial_lvl3.data"
+force_lvl3_theta_path = "./data/f_angular_lvl3.data"
 
 def read_path(path):
     """
@@ -37,25 +38,14 @@ def read_path(path):
     return d_
 
     
-def density_matrix(density, N_r, N_theta):
+def to_matrix(ilist, N_r, N_theta):
     """
-    Rearranges the density 1-D to 2-D array
-    """
-    surface = zeros((N_theta,N_r))
-    for i in range(N_r):
-        for j in range(N_theta):
-            surface[j][i] = density[j+N_theta*i]
-    return surface
-
-
-def force_matrix(force, N_r, N_theta):
-    """
-    Rearranges the force 1-D to 2-D array
+    Rearranges the olist 1-D to 2-D array
     """
     surface = zeros((N_theta,N_r))
     for i in range(N_r):
         for j in range(N_theta):
-            surface[j][i] = force[j+N_theta*i]
+            surface[j][i] = ilist[j+N_theta*i]
     return surface
 
 
@@ -66,7 +56,7 @@ def plot_density(density, r, theta, name):
     # rearrange density 1-D array to 2-D array
     N_r = len(r)
     N_theta = len(theta)
-    surface = density_matrix(density, N_r, N_theta)
+    surface = to_matrix(density, N_r, N_theta)
     # start figure
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -89,7 +79,7 @@ def plot_force_radial(force, r, theta, name):
     # rearrange force 1-D array to 2-D array
     N_r = len(r)
     N_theta = len(theta)
-    surface = force_matrix(force, N_r, N_theta)
+    surface = to_matrix(force, N_r, N_theta)
     # start figure
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -112,7 +102,7 @@ def plot_force_angular(force, r, theta, name):
     # rearrange force 1-D array to 2-D array
     N_r = len(r)
     N_theta = len(theta)
-    surface = force_matrix(force, N_r, N_theta)
+    surface = to_matrix(force, N_r, N_theta)
     # start figure
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -140,6 +130,8 @@ if __name__ == "__main__":
     force_lvl1_theta = read_path(force_lvl1_theta_path)
     force_lvl2_r = read_path(force_lvl2_r_path)
     force_lvl2_theta = read_path(force_lvl2_theta_path)
+    force_lvl3_r = read_path(force_lvl3_r_path)
+    force_lvl3_theta = read_path(force_lvl3_theta_path)
     
     # plots
     plot_density(density, r, theta, 'density.png')
@@ -149,3 +141,5 @@ if __name__ == "__main__":
     plot_force_angular(force_lvl1_theta, r, theta, 'angular_force_lvl1.png')
     plot_force_radial(force_lvl2_r, r, theta, 'radial_force_lvl2.png')
     plot_force_angular(force_lvl2_theta, r, theta, 'angular_force_lvl2.png')
+    plot_force_radial(force_lvl3_r, r, theta, 'radial_force_lvl3.png')
+    plot_force_angular(force_lvl3_theta, r, theta, 'angular_force_lvl3.png')
