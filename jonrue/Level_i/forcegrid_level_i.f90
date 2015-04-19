@@ -85,6 +85,8 @@ delta_theta=theta_prime(2)-theta_prime(1)
 volumina=delta_r*delta_theta
 
 
+
+
 !Shift the grid.....................................................
 do i=1,dim_r
 	r(i)=r_prime(i)-delta_r*0.5
@@ -106,7 +108,9 @@ call R_dR_PreCalculations(dim_r,dim_r,r,r_prime,R_List,dR_List)
 call sinus_cosinusPreCalculations(dim_theta,dim_theta_primeLevel1,theta,theta_prime_Level1,cosinus_List_Level1,sinus_List_Level1)
 call R_dR_PreCalculations(dim_r, dim_r_primeLevel1,r,r_prime_Level1,R_List_Level1,dR_List_Level1)
 
-
+write(*,*) R_List(34,34)
+write(*,*)
+write(*,*) dR_List(34,34)
 		
 
 !.............................................................................

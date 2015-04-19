@@ -2,7 +2,7 @@
 """
 Created on Wed Mar 11 15:40:49 2015
 
-@author: jonas
+@author: 
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,10 +14,10 @@ a=np.zeros((256,128))
 
 
 
-data=open("../output/forcegrid_difference_r.txt")
+data=open("../output/force_r.txt")
 for line in data:
     a0.append(float(line))
-data2=open("../output/forcegrid_thetacomponent_level1.txt")
+data2=open("../output/forcegrid_rcomponent.txt")
 for line in data2:
     b0.append(float(line))
     
@@ -25,18 +25,28 @@ for line in data2:
 index=0   
 for j in range(256):
     for i in range(128):
-        a[j][i]=a0[index]
+        a[j][i]=a0[index]-b0[index]
         index=index+1
 subplot(1,2,1)      
 imshow(a,origin='lower')
 colorbar()
 
+#index=0   
+#for j in range(256):
+#    for i in range(128):
+#        a[j][i]=b0[index]
+#        index=index+1
+#subplot(1,2,2)      
+#imshow(a,origin='lower')
+#colorbar()
+
+
 subplot(1,2,2)
-index2=0
+index2=120
 hold(True)
-for i in range(10):
-    plot(a[index2][:])
-    index2+=2
+for i in range(1):
+    plot(a[:][index2],'o')
+    index2+=1
     
 
 
