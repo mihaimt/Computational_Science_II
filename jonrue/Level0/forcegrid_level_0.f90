@@ -92,7 +92,7 @@ do i=1,dim_r
 		dR_List(i,j)=-(i-0.5)/(j*j*delta_r)
 	end do
 end do
-!End: Pre-Calculation of Values needed inside the main Loop.........................
+!End: Pre-Calculation of Values needed inside the main Loop............................
 
 call cpu_time(t2)
 
