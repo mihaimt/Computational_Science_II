@@ -14,10 +14,10 @@ a=np.zeros((256,128))
 
 
 
-data=open("../output/force_r.txt")
+data=open("output/forcegrid_rcomponent.txt")
 for line in data:
     a0.append(float(line))
-data2=open("../output/forcegrid_rcomponent.txt")
+data2=open("output/force_r.txt")
 for line in data2:
     b0.append(float(line))
     
@@ -27,9 +27,11 @@ for j in range(256):
     for i in range(128):
         a[j][i]=a0[index]-b0[index]
         index=index+1
-subplot(1,2,1)      
+#subplot(1,1,1)      
 imshow(a,origin='lower')
 colorbar()
+title("std=0.08 ohne Verschiebung des Grids")
+
 
 #index=0   
 #for j in range(256):
@@ -41,12 +43,12 @@ colorbar()
 #colorbar()
 
 
-subplot(1,2,2)
-index2=120
-hold(True)
-for i in range(1):
-    plot(a[:][index2],'o')
-    index2+=1
+#subplot(1,2,2)
+#index2=250
+#hold(True)
+#for i in range(1):
+#    plot(a[:][index2],'o')
+#    index2+=1
     
 
 

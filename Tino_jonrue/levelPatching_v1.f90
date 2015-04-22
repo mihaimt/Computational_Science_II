@@ -45,14 +45,14 @@ volumina = deltaT*deltaR
 
 do r=1,dimR
     do rP=1,dimR
-        rList(r,rP) = (r-0.5)/(rP-0.5)
-        drList(r,rP) = -(r-0.5)/((rP-0.5)*(rP-0.5)*deltaR)
+        rList(r,rP) = (r-0.5)/(rP+0.5)
+        drList(r,rP) = -(r-0.5)/((rP+0.5)*(rP+0.5)*deltaR)
     end do
 end do
 
 do t = 1,dimT
     do tP = 1,dimT
-        temp1 = deltaT*(t-tP-1.0)            
+        temp1 = deltaT*(t-tP-1)            
         cosList(t,tP) = cos(temp1)
         sinList(t,tP) = sin(temp1)
     end do
