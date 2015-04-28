@@ -14,10 +14,10 @@ a=np.zeros((256,128))
 
 
 
-data=open("../output/forcegrid_rcomponent_level1.txt")
+data=open("forcegrid_rcomponent_level0.txt")
 for line in data:
     a0.append(float(line))
-data2=open("../output/forcegrid_rcomponent.txt")
+data2=open("forcegrid_rcomponent.txt")
 for line in data2:
     b0.append(float(line))
     
@@ -32,12 +32,16 @@ imshow(a,origin='lower')
 colorbar()
 
 subplot(1,2,2)
-index2=19
+index2=50
 hold(True)
 for i in range(1):
-    plot(a[30:100,index2])
+    plot(a[index2,0:50])
     index2+=2
     
+#index=1
+#for i in range(50):
+#    print a[index,index]
+#    index+=2
 
 
 
