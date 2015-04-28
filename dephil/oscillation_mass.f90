@@ -1,22 +1,22 @@
 !--------------------------------------------------------------------------------------
-! PROGRAM GRAV_FORCE_LVLX
-!	compile: with make (Makefile included), e.g. make grav_force_lvlx
+! PROGRAM OSCILLATION_MASS
+!	compile: with make (Makefile included), e.g. make oscillation_mass
 !       
-!	use:	 ./grav_force_lvlx [LEVEL], e.g.  ./grav_force_lvlx 1
+!	use:	 ./oscillation_mass [LEVEL], e.g.  ./oscillation_mass 2
 !--------------------------------------------------------------------------------------
-PROGRAM grav_force_lvlx
+PROGRAM oscillation_mass
     IMPLICIT NONE
 
 ! DECLARATIONS
-    INTEGER :: i, iprime, j, jprime
+    INTEGER :: i, iprime, ishift, j, jprime, jshift, shifted_i, shifted_j
     INTEGER, PARAMETER :: N_r0=128, N_theta0=256
     INTEGER :: N_rx, N_thetax
-    INTEGER :: LEVEL
+    INTEGER :: LEVEL, factor_x
     REAL(8)  :: epsilon2 ! this value seems to be the closest to the LEVEL0 solution
                          ! the value for LEVEL 2 seems to be close to 0.000336
 
-    REAL(8) :: force_point, denom_point,&
-             & f_rx=0., f_thetax=0.
+    REAL(8) :: inv_factor2, vmass, dr_shift, dtheta_shift, force_point, denom_point,&
+               &ratio, ratio_squared, cosine, sine, rprime, delta_theta!, denom_sqrt
 
     REAL(8), DIMENSION(N_r0) :: r0, dr0, r0_squared, r0_prime_squared
     REAL(8), DIMENSION(:), ALLOCATABLE :: rx, drx, rx_squared, rx_prime_squared
@@ -28,6 +28,8 @@ PROGRAM grav_force_lvlx
     REAL(8), DIMENSION(:, :), ALLOCATABLE :: sigmax, massx
     REAL(8), DIMENSION(1-N_theta0:N_theta0-1) :: cos_table0, sin_table0
     REAL(8), DIMENSION(:, :), ALLOCATABLE :: cos_tablex, sin_tablex
+!    REAL(8), DIMENSION(:, :, :, :), ALLOCATABLE :: denomx
+    REAL(8), DIMENSION(:, :), ALLOCATABLE :: force_r, force_theta
 
     REAL :: start, finish
 
@@ -38,42 +40,45 @@ PROGRAM grav_force_lvlx
     call getarg(1, arg)
     read (arg, '(i5)') LEVEL
 
-    N_rx = N_r0/2**LEVEL
-    N_thetax = N_theta0/2**LEVEL
+    factor_x = 2**LEVEL
+    inv_factor2 = 1./(factor_x*factor_x)
+    N_rx = N_r0/factor_x
+    N_thetax = N_theta0/factor_x
+
+    allocate(force_r(0:N_r0+factor_x, 0:N_theta0+factor_x), force_theta(0:N_r0+factor_x, 0:N_theta0+factor_x))     ! allocate with ghost cells
 
     if (LEVEL==0) then
         epsilon2 = 0
     else if (LEVEL==1) then
-        epsilon2 = .000001 !.000118
+        epsilon2 = .000001
     else if (LEVEL==2) then
-        epsilon2 = .000001 !.000346
-    else if (LEVEL==3) then
-        epsilon2 = .000001 !.000902      ! try different values
+        epsilon2 = .000001       ! try different values
     else
         epsilon2 = .000001       ! try different values
     end if
 
 !--------------------------------------------------------------------------------------
 ! OPEN FILES
-    open(unit=11, file=TRIM('./data/f_radial_lvl'//arg//'.data'), action='write')
-    open(unit=12, file=TRIM('./data/f_angular_lvl'//arg//'.data'), action='write')
+    open(unit=11, file=TRIM('./data/radial_osc_mass_lvl'//arg//'.data'), action='write')
+    open(unit=12, file=TRIM('./data/angular_osc_mass_lvl'//arg//'.data'), action='write')
 
 !--------------------------------------------------------------------------------------
 ! READ INPUT FILES
-    call read_input(N_r0, N_theta0, r0, theta0, sigma0)
+    call read_input(N_r0, N_theta0, r0, theta0, sigma0)   ! r0 and theta0 indicate the centers of the grid cells
 
 ! READ IN LEVEL ONE ------------------
-    call grid_param_lvlx(LEVEL, N_r0, N_theta0, r0, theta0, sigma0, rx, thetax, sigmax)
+    call grid_param_lvlx(LEVEL, N_r0, N_theta0, r0, theta0, sigma0, rx, thetax, sigmax)   ! rx and thetax indicate the centers of the grid cells in LEVEL X
 
 !--------------------------------------------------------------------------------------
 ! PRECALCULATIONS
-    call precalcs_lvl0(N_r0, N_theta0, r0, theta0, dr0, dtheta0, r0_squared, r0_prime_squared,&
-                       & r0_ratio, r0_ratio_squared, cos_table0, sin_table0)
-
+    call precalcs_lvl0(N_r0, N_theta0, r0, theta0, dr0, dtheta0, r0_squared, r0_prime_squared,&   ! r0_squared indicates the corners, r0_prime_squared indicates the centers
+                       & r0_ratio, r0_ratio_squared, cos_table0, sin_table0)                      ! cos and sin with differences of corners to centers
     call precalcs_lvlx(LEVEL, N_r0, N_theta0, r0, theta0, rx, thetax,&
                                  & drx, dthetax, rx_squared, rx_prime_squared,&
                                  & rx_ratio, rx_ratio_squared,&
-                                 & cos_tablex, sin_tablex)
+                                 & cos_tablex, sin_tablex)                                        ! same as above for LEVEL X, ratios indicate the corners to the centers
+!    call precalc_denomx(LEVEL, N_r0, N_theta0, rx_ratio, rx_ratio_squared, cos_tablex, denomx)
+!    call precalc_shift(LEVEL, N_r0, N_theta0, rx_prime_squared)
 
 !--------------------------------------------------------------------------------------
 ! PROPAGATION starts here
@@ -86,42 +91,70 @@ PROGRAM grav_force_lvlx
     call calc_masslvlx(LEVEL, N_r0, N_theta0, mass0, massx)
 
 ! write force components for every corner in grid
-    do i = 1, N_r0
-        do j = 1, N_theta0!, 2**LEVEL
+    do i = 1, N_r0, factor_x
+        do j = 1, N_theta0, factor_x
             ! sum up the forces on the point (i, j)
-            do iprime = 1, N_rx
-                do jprime = 1, N_thetax
-                    ! formula for the gravitational force split into four parts for faster calculation
-                            ! expressed in terms of ratios of r
-                            ! F_grav = Sum ( Mass / (r_iprime*sqrt(1+r_ratio_squared-2*r_ratio*cos))³/² ) * r_iprime | (r_ratio - cos), (sin)
+            do ishift = 0, factor_x-1
+                shifted_i = i+ishift
+                dr_shift = r0(i+ishift)-r0(i)
+                do jshift = 0, factor_x-1
+                    dtheta_shift = theta0(j+jshift)-theta0(j)
+                    do iprime = 1, N_rx
+                        rprime = rx(iprime)+dr_shift
+                        ratio = (r0(shifted_i)-.5*dr0(shifted_i))/(rprime)
+                        ratio_squared = ratio*ratio
+                        rprime = rprime*rprime
+                        do jprime = 1, N_thetax
+                            ! formula for the gravitational force split into four parts for faster calculation
+                                 ! expressed in terms of ratios of r
+                                 ! F_grav = Sum ( Mass / (r_iprime*sqrt(1+r_ratio_squared-2*r_ratio*cos))³/² ) * r_iprime | (r_ratio - cos), (sin)
+                            vmass = ( (factor_x-ishift) * (factor_x-jshift)  * massx(iprime, jprime)+ &
+                                     & ishift  * (factor_x-jshift)         * massx(iprime+1, jprime)+ &
+                                     & (factor_x-ishift) * jshift          * massx(iprime, jprime+1)+ &
+                                     &          ishift * jshift          * massx(iprime+1, jprime+1)  &
+                                     &)*inv_factor2
+                            shifted_j = j+jshift
+                            ! variables depending on iprime, jprime have to be shifted according to dr_shift / dtheta_shift
+                            ! rx_ratio_squared(i,iprime) ; rx_ratio(i,iprime) ; cos_tablex(j,jprime) ; rx_prime_squared(iprime) ; sin_tablex(j,jprime)
+                            delta_theta = theta0(shifted_j)-.5*dtheta0(shifted_j)-thetax(jprime)-dtheta_shift
+                            cosine = cos(delta_theta)
+                            sine = sin(delta_theta)
+                            denom_point = 1+ratio_squared-2*ratio*cosine
+                            denom_point = sqrt(denom_point)*denom_point*rprime
+                            force_point = vmass/denom_point
+                            force_r(shifted_i, shifted_j) = force_r(shifted_i, shifted_j) + force_point&
+                                            &*(ratio-cosine)
+                            force_theta(shifted_i, shifted_j) = force_theta(shifted_i, shifted_j) + force_point&
+                                                &*sine
 
-                    !denom_point = InvSqrt(1+r1_ratio_squared(i, iprime)-2*r1_ratio(i, iprime)*cos_table1(j, jprime)+epsilon2)
-                    denom_point = (1+rx_ratio_squared(i, iprime)-2*rx_ratio(i, iprime)*cos_tablex(j, jprime)+epsilon2)
-                    !denom_point = c_invsqrt64(1+r1_ratio_squared(i, iprime)-2*r1_ratio(i, iprime)*cos_table1(j, jprime)+epsilon2)   ! returns somehow Nan's
+                            !denom_point = (1+rx_ratio_squared(i, iprime)-2*rx_ratio(i, iprime)*cos_tablex(j, jprime))
+                            !denom_point = sqrt(denom_point)*denom_point*rx_prime_squared(iprime)
+                            !force_point = vmass/denom_point
+                            !force_r(shifted_i, shifted_j) = force_r(shifted_i, shifted_j) + force_point&
+                            !                &*(rx_ratio(i, iprime)-cos_tablex(j, jprime))
+                            !force_theta(shifted_i, shifted_j) = force_theta(shifted_i, shifted_j) + force_point&
+                            !                    &*sin_tablex(j, jprime)
 
-                    force_point = massx(iprime,jprime)/(sqrt(denom_point)*denom_point*rx_prime_squared(iprime))
-
-                    f_rx = f_rx + force_point&
-                            &*(rx_ratio(i, iprime)-cos_tablex(j, jprime))
-                    f_thetax = f_thetax + force_point&
-                            &*sin_tablex(j, jprime)
+                        end do
+                    end do
                 end do
             end do
-            !do jprime = 1, 2**LEVEL
-                write(11, '(e20.10)') f_rx
-                write(12, '(e20.10)') f_thetax
-            !end do
-            f_rx = 0.
-            f_thetax = 0.
         end do
     end do
-
+    
 ! here the calculation has ended
     call CPU_TIME(finish)
     write(*,*) 'Calculation time =', finish-start, 'seconds'
 
+    do i = 1, N_r0
+        do j = 1, N_theta0
+            write(11, '(e20.10)') force_r(i, j)
+            write(12, '(e20.10)') force_theta(i, j)
+        end do
+    end do
     close(unit=11)
     close(unit=12)
+
 
 ! difference of the forces
 !    open(unit=13, file='./data/f_radial_diffto'//arg//'.data', action='write')
@@ -137,6 +170,7 @@ PROGRAM grav_force_lvlx
 !    close(unit=13)
 !    close(unit=14)
 !    close(unit=15)
+
 
     CONTAINS
 
@@ -193,13 +227,13 @@ PROGRAM grav_force_lvlx
             REAL(8), DIMENSION(:,:), ALLOCATABLE, intent(out) :: sigmalvl   ! allocate according to level
 
             INTEGER :: i, j, permute_i, permute_j     ! iterators
-            INTEGER :: lvl_factor                     ! = 2^N_lvl
+            INTEGER :: factor_lvl                     ! = 2^N_lvl
             INTEGER :: N_rlvl, N_thetalvl             ! dimensions of parameters in Level N_lvl
             REAL(8) :: temp=0
 
-            lvl_factor=2**N_lvl
-            N_rlvl=N_r0/lvl_factor
-            N_thetalvl=N_theta0/lvl_factor
+            factor_lvl=2**N_lvl
+            N_rlvl=N_r0/factor_lvl
+            N_thetalvl=N_theta0/factor_lvl
 
             allocate(rlvl(N_rlvl))
             allocate(thetalvl(N_thetalvl))
@@ -207,22 +241,22 @@ PROGRAM grav_force_lvlx
 
             ! READ IN LEVEL N_lvl ------------------
             ! read <radii> into 1-D array for LEVEL X
-            do i = lvl_factor, N_r0, lvl_factor
-                rlvl(i/lvl_factor) = (r0(i)+r0(i-(lvl_factor-1)))*.5
+            do i = factor_lvl, N_r0, factor_lvl
+                rlvl(i/factor_lvl) = (r0(i)+r0(i-(factor_lvl-1)))*.5
             end do
             ! read <angles> into 1-D array for LEVEL X
-            do j = lvl_factor, N_theta0, lvl_factor
-                thetalvl(j/lvl_factor) = (theta0(j)+theta0(j-(lvl_factor-1)))*.5
+            do j = factor_lvl, N_theta0, factor_lvl
+                thetalvl(j/factor_lvl) = (theta0(j)+theta0(j-(factor_lvl-1)))*.5
             end do
             ! read <density> into 2-D array for LEVEL X
-            do i = lvl_factor, N_r0, lvl_factor
-                do j = lvl_factor, N_theta0, lvl_factor
-                    do permute_i = 0, lvl_factor-1
-                        do permute_j = 0, lvl_factor-1
+            do i = factor_lvl, N_r0, factor_lvl
+                do j = factor_lvl, N_theta0, factor_lvl
+                    do permute_i = 0, factor_lvl-1
+                        do permute_j = 0, factor_lvl-1
                             temp = temp + sigma0(i-permute_i, j-permute_j)
                         end do
                     end do
-                sigmalvl(i/lvl_factor, j/lvl_factor) = temp
+                sigmalvl(i/factor_lvl, j/factor_lvl) = temp
                 temp = 0
                 end do
             end do
@@ -299,13 +333,13 @@ PROGRAM grav_force_lvlx
             REAL(8), DIMENSION(:, :), ALLOCATABLE, intent(out) :: cos_tablelvl, sin_tablelvl
 
             INTEGER :: i, j                           ! iterators
-            INTEGER :: lvl_factor                     ! = 2^N_lvl
+            INTEGER :: factor_lvl                     ! = 2^N_lvl
             INTEGER :: N_rlvl, N_thetalvl             ! dimensions of parameters in Level N_lvl
             REAL(8) :: r0_i, rlvl_i, rlvl_iprime, theta0_j, diff_theta
 
-            lvl_factor=2**N_lvl
-            N_rlvl=N_r0/lvl_factor
-            N_thetalvl=N_theta0/lvl_factor
+            factor_lvl=2**N_lvl
+            N_rlvl=N_r0/factor_lvl
+            N_thetalvl=N_theta0/factor_lvl
 
             allocate(drlvl(N_rlvl), rlvl_squared(N_rlvl), rlvl_prime_squared(N_rlvl))
             allocate(dthetalvl(N_thetalvl))
@@ -351,9 +385,40 @@ PROGRAM grav_force_lvlx
 
         END SUBROUTINE precalcs_lvlx
 
+        SUBROUTINE precalc_denomx(N_lvl, N_r0, N_theta0, rlvl_ratio,&
+                                  & rlvl_ratio_squared, cos_tablelvl, denomlvl) ! allocatable: rlvl_ratio, rlvl_ration_squared, cos_tablelvl, denomlvl
+            IMPLICIT NONE
+            ! DECLARATIONS
+            INTEGER, intent(in) :: N_lvl, N_r0, N_theta0
+            REAL(8), DIMENSION(:, :), ALLOCATABLE, intent(in) :: rlvl_ratio, rlvl_ratio_squared
+            REAL(8), DIMENSION(:, :), ALLOCATABLE, intent(in) :: cos_tablelvl
+            REAL(8), DIMENSION(:, :, :, :), ALLOCATABLE, intent(out) :: denomlvl
+            
+            INTEGER :: i, j, iprime, jprime           ! iterators
+            INTEGER :: lvl_factor                     ! = 2^N_lvl
+            INTEGER :: N_rlvl, N_thetalvl             ! dimensions of parameters in Level N_lvl
+
+            lvl_factor=2**N_lvl
+            N_rlvl=N_r0/lvl_factor
+            N_thetalvl=N_theta0/lvl_factor
+
+            allocate(denomlvl(N_r0, N_theta0, N_rlvl, N_thetalvl))
+
+            do i = 1, N_r0
+                do j = 1, N_theta0
+                    do iprime = 1, N_rlvl
+                        do jprime = 1, N_thetalvl
+                            denomlvl(i, j, iprime, jprime) = sqrt(1+rlvl_ratio_squared(i, iprime)&
+                                                                 &-2*rlvl_ratio(i, iprime)*cos_tablelvl(j, jprime))
+                        end do
+                    end do
+                end do
+            end do
+        END SUBROUTINE precalc_denomx
+
         SUBROUTINE calc_masslvl0(N_r0, N_theta0, sigma0, r0, dr0, dtheta0, mass0)
             IMPLICIT NONE
-            ! DECLARATION
+            ! DECLARATIONS
             INTEGER, intent(in) :: N_r0, N_theta0
             REAL(8), DIMENSION(N_r0), intent(in) :: r0, dr0
             REAL(8), DIMENSION(N_theta0), intent(in) :: dtheta0
@@ -369,41 +434,136 @@ PROGRAM grav_force_lvlx
                     mass0(iprime,jprime) = -sigma0(iprime,jprime)*r0dr0_iprime*dtheta0(jprime)
                 end do
             end do
-
         END SUBROUTINE calc_masslvl0
 
         SUBROUTINE calc_masslvlx(N_lvl, N_r0, N_theta0, mass0, masslvl)
             IMPLICIT NONE
-            ! DECLARATION
+            ! DECLARATIONS
             INTEGER, intent(in) :: N_lvl
             INTEGER, intent(in) :: N_r0, N_theta0
             REAL(8), DIMENSION(N_r0, N_theta0), intent(in) :: mass0
             REAL(8), DIMENSION(:, :), ALLOCATABLE, intent(out) :: masslvl
 
             INTEGER :: i, j, permute_i, permute_j     ! iterators
-            INTEGER :: lvl_factor                     ! = 2^N_lvl
+            INTEGER :: factor_lvl                     ! = 2^N_lvl
             INTEGER :: N_rlvl, N_thetalvl             ! dimensions of parameters in Level N_lvl
             REAL(8) :: temp=0
 
-            lvl_factor=2**N_lvl
-            N_rlvl=N_r0/lvl_factor
-            N_thetalvl=N_theta0/lvl_factor
+            factor_lvl=2**N_lvl
+            N_rlvl=N_r0/factor_lvl
+            N_thetalvl=N_theta0/factor_lvl
 
-            allocate(masslvl(N_rlvl, N_thetalvl))
+            allocate(masslvl(0:N_rlvl+1, 0:N_thetalvl+1))
 
-            ! fill the <mass table> for LEVEL 1
-            do i = lvl_factor, N_r0, lvl_factor
-                do j = lvl_factor, N_theta0, lvl_factor
-                    do permute_i = 0, lvl_factor-1
-                        do permute_j = 0, lvl_factor-1
+            ! fill the <mass table> for LEVEL X
+            do i = factor_lvl, N_r0, factor_lvl
+                do j = factor_lvl, N_theta0, factor_lvl
+                    do permute_i = 0, factor_lvl-1
+                        do permute_j = 0, factor_lvl-1
                             temp = temp + mass0(i-permute_i, j-permute_j)
                         end do
                     end do
-                masslvl(i/lvl_factor, j/lvl_factor) = temp
+                masslvl(i/factor_lvl, j/factor_lvl) = temp
                 temp = 0
                 end do
             end do
+            ! assign boundary conditions / ghost cells
+            masslvl(0, :) = 0
+            masslvl(:, 0) = masslvl(:, N_thetalvl)
+            masslvl(N_rlvl+1, :) = 0
+            masslvl(:, N_thetalvl+1) = masslvl(:, 1)
 
         END SUBROUTINE
 
-END PROGRAM grav_force_lvlx
+        SUBROUTINE fill_radial_gaps(N_lvl, N_r0, N_theta0, f_r, f_theta)
+            IMPLICIT NONE
+            ! always call fill_radial_gaps before fill_angular_gaps()
+            ! DECLARATIONS
+            INTEGER, intent(in) :: N_lvl
+            INTEGER, intent(in) :: N_r0, N_theta0
+            REAL(8), DIMENSION(0:N_r0+2**N_lvl, 0:N_theta0+2**N_lvl), intent(inout) :: f_r, f_theta
+            INTEGER :: i, j, ishift
+
+            ! assign boundary condtitions / ghost cells
+            f_r(0, :) = 0
+            f_theta(0, :) = 0
+            f_r(:, 0) = f_r(:, N_theta0)
+            f_theta(:, 0) = f_theta(:, N_theta0)
+            f_r(N_r0+2**N_lvl, :) = 0
+            f_theta(N_r0+2**N_lvl, :) = 0
+            f_r(:, N_theta0+2**N_lvl) = f_r(:, 2**N_lvl)
+            f_theta(:, N_theta0+2**N_lvl) = f_theta(:, 2**N_lvl)
+            
+            do i = 1, N_r0, 2**N_lvl
+                do j = 1, N_theta0, 2**N_lvl
+                    do ishift = 1, 2**N_lvl-1
+                        f_r(i+ishift, j) = f_r(i, j)*(1-ishift*1./2**N_lvl) + f_r(i+2**N_lvl, j)*ishift*1./2**N_lvl
+                        f_theta(i+ishift, j) = f_theta(i, j)*(1-ishift*1./2**N_lvl) + f_theta(i+2**N_lvl, j)*ishift*1./2**N_lvl
+                    end do
+                end do
+            end do
+        END SUBROUTINE fill_radial_gaps
+
+        SUBROUTINE fill_angular_gaps(N_lvl, N_r0, N_theta0, f_r, f_theta)
+            IMPLICIT NONE
+            ! always call fill_vertical_gaps before fill_horizontal_gaps()
+            ! DECLARATIONS
+            INTEGER, intent(in) :: N_lvl
+            INTEGER, intent(in) :: N_r0, N_theta0
+            REAL(8), DIMENSION(0:N_r0+2**N_lvl, 0:N_theta0+2**N_lvl), intent(inout) :: f_r, f_theta
+            INTEGER :: i, j, jshift
+            
+            do i = 1, N_r0, 2**N_lvl
+                do j = 1, N_theta0, 2**N_lvl
+                    do jshift = 1, 2**N_lvl-1
+                        f_r(i, j+jshift) = f_r(i, j)*(1-jshift*1./2**N_lvl) + f_r(i, j+2**N_lvl)*jshift*1./2**N_lvl
+                        f_theta(i, j+jshift) = f_theta(i, j)*(1-jshift*1./2**N_lvl) + f_theta(i, j+2**N_lvl)*jshift*1./2**N_lvl
+                    end do
+                end do
+            end do
+        END SUBROUTINE fill_angular_gaps
+
+        SUBROUTINE fill_gaps(N_lvl, N_r0, N_theta0, f_r, f_theta)
+            IMPLICIT NONE
+            ! always call fill_vertical_gaps before fill_horizontal_gaps()
+            ! DECLARATIONS
+            INTEGER, intent(in) :: N_lvl
+            INTEGER, intent(in) :: N_r0, N_theta0
+            REAL(8), DIMENSION(0:N_r0+2**N_lvl, 0:N_theta0+2**N_lvl), intent(inout) :: f_r, f_theta
+            INTEGER :: i, j, ishift, jshift, factor_lvl
+            REAL(8) :: inv_factor_2
+            
+            factor_lvl = 2**N_lvl
+            inv_factor_2 = 1./(factor_lvl*factor_lvl)
+
+            ! assign boundary condtions / ghost cells
+            f_r(0, :) = 0                                                ! zero overdensity
+            f_theta(0, :) = 0                                            ! zero overdensity
+            f_r(:, 0) = f_r(:, N_theta0)                                 ! periodicity
+            f_theta(:, 0) = f_theta(:, N_theta0)                         ! periodicity
+            f_r(N_r0+factor_lvl, :) = 0                                  ! zero overdensity
+            f_theta(N_r0+factor_lvl, :) = 0                              ! zero overdensity
+            f_r(:, N_theta0+factor_lvl) = f_r(:, factor_lvl)             ! periodicity
+            f_theta(:, N_theta0+factor_lvl) = f_theta(:, factor_lvl)     ! periodicity
+
+            do i = 1, N_r0, factor_lvl
+                do j = 1, N_theta0, factor_lvl
+                    do ishift = 0, factor_lvl-1
+                        do jshift = 0, factor_lvl-1
+                            f_r(i+ishift, j+jshift) = ( (factor_lvl-ishift) * (factor_lvl-jshift) * f_r(i, j) + &
+                                                       & ishift  * (factor_lvl-jshift) * f_r(i+factor_lvl, j) + &
+                                                       &(factor_lvl-ishift) * jshift * f_r(i, j+factor_lvl)   + &
+                                                       &       ishift * jshift * f_r(i+factor_lvl, j+factor_lvl)&
+                                                       &)*inv_factor_2
+                            f_theta(i+ishift, j+jshift) = ( (factor_lvl-ishift) * (factor_lvl-jshift) * f_theta(i, j) + &
+                                                           & ishift  * (factor_lvl-jshift) * f_theta(i+factor_lvl, j) + &
+                                                           &(factor_lvl-ishift) * jshift * f_theta(i, j+factor_lvl)   + &
+                                                           &       ishift * jshift * f_theta(i+factor_lvl, j+factor_lvl)&
+                                                           &)*inv_factor_2
+                        end do
+                    end do
+                end do
+            end do
+        END SUBROUTINE fill_gaps
+
+END PROGRAM oscillation_mass
