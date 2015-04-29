@@ -1,0 +1,27 @@
+\frametitle{Timings}
+  {\tiny
+  \begin{verbatim}
+------------------------------------------------------------------------------------------------------------
+ OPTIMAL TIME STANDS AT:   10.2038803 sec -> current standard
+
+ without mass array    255.950150
+                                   (slight performance improvements by avoiding too many array calls)
+    with mass array    152.530518
+                                   (half mass calc operations; inner loop)
+sin/cos inside loop    119.338303
+                                   (one cos calculation eliminated; inner loop)
+   with denominator    57.8149910
+                                   (denominator using sqrt*sqrt*sqrt instead **1.5)
+with sin/cos tables    17.7189388
+                                   (calculating cos/sin in external loop)
+         mass table    15.7216377
+                                   (calculating the mass in external loop)
+  with r_iprime_cos    14.8603277
+                                   (saves a few calculations in the inner loop since it appears twice there)
+ optimizer flag -O1    10.2038803
+                                   (remembered that gnu compilers have no optimization default)
+     custom invsqrt    84.1394730
+                                   (sadly much slower than intrinsic 1./sqrt,
+                                         but the error is actually not that bad)
+------------------------------------------------------------------------------------------------------------
+  \end{verbatim}}

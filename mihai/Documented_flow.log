@@ -1,0 +1,612 @@
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=pdflatex 2013.3.11)  26 MAR 2015 11:47
+entering extended mode
+ %&-line parsing enabled.
+**Documented_flow
+(./Documented_flow
+LaTeX2e <2005/12/01>
+Babel <v3.8h> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, arabic, basque, bulgarian, coptic, welsh, czech, slovak, german, ng
+erman, danish, esperanto, spanish, catalan, galician, estonian, farsi, finnish,
+ french, greek, monogreek, ancientgreek, croatian, hungarian, interlingua, ibyc
+us, indonesian, icelandic, italian, latin, mongolian, dutch, norsk, polish, por
+tuguese, pinyin, romanian, russian, slovenian, uppersorbian, serbian, swedish, 
+turkish, ukenglish, ukrainian, loaded.
+(/usr/share/texmf/tex/latex/base/article.cls
+Document Class: article 2005/09/16 v1.4f Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/size10.clo
+File: size10.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf/tex/latex/base/inputenc.sty
+Package: inputenc 2006/05/05 v1.1b Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+
+(/usr/share/texmf/tex/latex/ucs/utf8x.def
+File: utf8x.def 2004/10/17 UCS: Input encoding UTF-8
+))
+(/usr/share/texmf/tex/latex/ucs/ucs.sty
+Package: ucs 2004/10/17 UCS: Unicode input support
+
+(/usr/share/texmf/tex/latex/ucs/data/uni-global.def
+File: uni-global.def 2004/10/17 UCS: Unicode global data
+)
+\uc@secondtry=\count87
+\uc@combtoks=\toks16
+\uc@combtoksb=\toks17
+\uc@temptokena=\toks18
+)
+(/usr/share/texmf/tex/latex/listings/listings.sty
+(/usr/share/texmf/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks19
+)
+\lst@mode=\count88
+\lst@gtempboxa=\box26
+\lst@token=\toks20
+\lst@length=\count89
+\lst@currlwidth=\dimen103
+\lst@column=\count90
+\lst@pos=\count91
+\lst@lostspace=\dimen104
+\lst@width=\dimen105
+\lst@newlines=\count92
+\lst@lineno=\count93
+\c@lstlisting=\count94
+\lst@maxwidth=\dimen106
+
+(/usr/share/texmf/tex/latex/listings/lstpatch.sty
+File: lstpatch.sty 2004/10/17 1.3b (Carsten Heinz)
+)
+(/usr/share/texmf/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2004/09/07 1.3 (Carsten Heinz)
+\c@lstnumber=\count95
+\lst@skipnumbers=\count96
+\lst@framebox=\box27
+)
+(/usr/share/texmf/tex/latex/listings/listings.cfg
+File: listings.cfg 2004/09/05 1.3 listings configuration
+))
+Package: listings 2004/10/17 1.3b (Carsten Heinz)
+
+(/usr/share/texmf/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf/tex/latex/graphics/graphics.sty
+Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/share/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: pdftex.def on input line 90.
+
+(/usr/share/texmf/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2007/01/08 v0.04d Graphics/color for pdfTeX
+\Gread@gobject=\count97
+))
+\Gin@req@height=\dimen107
+\Gin@req@width=\dimen108
+)
+(/usr/share/texmf/tex/latex/caption/caption.sty
+Package: caption 2007/01/07 v3.0k Customising captions (AR)
+
+(/usr/share/texmf/tex/latex/caption/caption3.sty
+Package: caption3 2007/01/07 v3.0k caption3 kernel (AR)
+\captionmargin=\dimen109
+\captionmarginx=\dimen110
+\captionwidth=\dimen111
+\captionindent=\dimen112
+\captionparindent=\dimen113
+\captionhangindent=\dimen114
+)
+Package caption Info: listings package v1.2 (or newer) detected on input line 3
+38.
+) (./Documented_flow.aux)
+\openout1 = `Documented_flow.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+
+(/usr/share/texmf/tex/latex/ucs/ucsencs.def
+File: ucsencs.def 2003/11/29 Fixes to fontencodings LGR, T3
+)
+(/usr/share/texmf/tex/latex/ragged2e/ragged2e.sty
+Package: ragged2e 2003/03/25 v2.04 ragged2e Package (MS)
+
+(/usr/share/texmf/tex/latex/everysel/everysel.sty
+Package: everysel 1999/06/08 v1.03 EverySelectfont Package (MS)
+LaTeX Info: Redefining \selectfont on input line 125.
+)
+\CenteringLeftskip=\skip43
+\RaggedLeftLeftskip=\skip44
+\RaggedRightLeftskip=\skip45
+\CenteringRightskip=\skip46
+\RaggedLeftRightskip=\skip47
+\RaggedRightRightskip=\skip48
+\CenteringParfillskip=\skip49
+\RaggedLeftParfillskip=\skip50
+\RaggedRightParfillskip=\skip51
+\JustifyingParfillskip=\skip52
+\CenteringParindent=\skip53
+\RaggedLeftParindent=\skip54
+\RaggedRightParindent=\skip55
+\JustifyingParindent=\skip56
+)
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 25.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 25.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 25.
+ [1
+
+{/usr/share/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <14.4> on input line 31.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 31.
+ (/usr/share/texmf/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2004/09/05 1.3 listings language file
+) (/usr/share/texmf/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2004/09/05 1.3 listings language file
+)
+(/home/ics/mihai/git/Computational_Science_II_Open/gravity.f90
+Overfull \hbox (183.00537pt too wide) in paragraph at lines 15--16
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (207.00562pt too wide) in paragraph at lines 16--17
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (219.00574pt too wide) in paragraph at lines 17--21
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 22.
+(/usr/share/texmf/tex/latex/base/omscmr.fd
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 22.
+
+Overfull \hbox (213.00568pt too wide) in paragraph at lines 46--47
+[][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (213.00568pt too wide) in paragraph at lines 47--48
+[][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[2
+
+]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 53.
+
+Overfull \hbox (45.00397pt too wide) in paragraph at lines 63--64
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (147.005pt too wide) in paragraph at lines 64--65
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (105.00458pt too wide) in paragraph at lines 65--66
+[][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (123.00476pt too wide) in paragraph at lines 66--68
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (45.00397pt too wide) in paragraph at lines 68--69
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (105.00458pt too wide) in paragraph at lines 70--71
+[][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (123.00476pt too wide) in paragraph at lines 71--72
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (147.005pt too wide) in paragraph at lines 91--92
+[][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+) [3]
+Overfull \hbox (3.45969pt too wide) in paragraph at lines 39--39
+[]\OT1/cmr/bx/n/14.4 First set of pre-calculations - $\OML/cmm/m/it/14.4 gravit
+y[]precalc:f\OT1/cmr/m/n/14.4 90$ 
+ []
+
+(/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc.f90)
+(/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc.f90
+Overfull \hbox (27.00378pt too wide) in paragraph at lines 71--72
+[][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+) (/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc.f90)
+(/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc.f90
+Overfull \hbox (93.00446pt too wide) in paragraph at lines 102--103
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[4]
+Overfull \hbox (21.00372pt too wide) in paragraph at lines 103--105
+[][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (99.00452pt too wide) in paragraph at lines 108--109
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (27.00378pt too wide) in paragraph at lines 109--110
+[][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (57.00409pt too wide) in paragraph at lines 114--115
+[][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (57.00409pt too wide) in paragraph at lines 115--116
+[][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+) (/home/ics/mihai/git/Computational_Science_II_Open/gravity_reduct.f90
+Overfull \hbox (33.00385pt too wide) in paragraph at lines 101--102
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (69.00421pt too wide) in paragraph at lines 103--104
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (105.00458pt too wide) in paragraph at lines 104--105
+[][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (33.00385pt too wide) in paragraph at lines 106--107
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (75.00427pt too wide) in paragraph at lines 108--109
+[][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+)
+Overfull \hbox (105.00458pt too wide) in paragraph at lines 109--61
+[][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (32.04321pt too wide) in paragraph at lines 67--67
+[]\OT1/cmr/bx/n/14.4 Second set of pre-calculations - $\OML/cmm/m/it/14.4 gravi
+ty[]precalc[]\OT1/cmr/m/n/14.4 2\OML/cmm/m/it/14.4 :f\OT1/cmr/m/n/14.4 90$ 
+ []
+
+[5] (/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_2.f90)
+(/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_2.f90
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 72--73
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+) (/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_2.f90
+Overfull \hbox (27.00378pt too wide) in paragraph at lines 113--114
+[][][][][][][][][][][][][][] 
+ []
+
+)
+Overfull \hbox (27.00378pt too wide) in paragraph at lines 118--81
+[][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (15.76732pt too wide) in paragraph at lines 85--85
+[]\OT1/cmr/bx/n/14.4 First op-er-a-tion op-ti-miza-tion - $\OML/cmm/m/it/14.4 g
+ravity[]optimiz:f\OT1/cmr/m/n/14.4 90$ 
+ []
+
+(/home/ics/mihai/git/Computational_Science_II_Open/gravity_optimiz.f90
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 115--116
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[6]) (/home/ics/mihai/git/Computational_Science_II_Open/gravity_optimiz.f90
+Overfull \hbox (45.00397pt too wide) in paragraph at lines 80--81
+[][][][][][][][][][][][][][][][][][][] 
+ []
+
+)
+Overfull \hbox (146.50761pt too wide) in paragraph at lines 105--105
+[]\OT1/cmr/bx/n/14.4 Exploiting the trigono-met-ric sym-me-try - $\OML/cmm/m/it
+/14.4 gravity[]theta[]symmetry:f\OT1/cmr/m/n/14.4 90$ 
+ []
+
+(/home/ics/mihai/git/Computational_Science_II_Open/gravity_theta_symmetry.f90
+[7]
+Overfull \hbox (27.00378pt too wide) in paragraph at lines 117--118
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (27.00378pt too wide) in paragraph at lines 133--135
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 151--152
+[][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 152--153
+[][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (75.00427pt too wide) in paragraph at lines 155--156
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (75.00427pt too wide) in paragraph at lines 156--159
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+) [8]
+Overfull \hbox (19.13489pt too wide) in paragraph at lines 125--125
+[]\OT1/cmr/bx/n/14.4 Third set of pre-cal-cu-ta-tions - $\OML/cmm/m/it/14.4 gra
+vity[]precalc[]\OT1/cmr/m/n/14.4 3\OML/cmm/m/it/14.4 :f\OT1/cmr/m/n/14.4 90$ 
+ []
+
+(/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_3.f90
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 106--109
+[][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 110--111
+[][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 111--113
+[][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+) (/home/ics/mihai/git/Computational_Science_II_Open/gravity_precalc_3.f90
+[9]) (/home/ics/mihai/git/Computational_Science_II_Open/gravity_optimiz_2.f90
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 7--8
+[][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (129.00482pt too wide) in paragraph at lines 8--9
+[][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (9.0036pt too wide) in paragraph at lines 9--10
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 13--14
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (183.00537pt too wide) in paragraph at lines 22--23
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (207.00562pt too wide) in paragraph at lines 23--24
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (219.00574pt too wide) in paragraph at lines 24--28
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[10]
+Overfull \hbox (201.00555pt too wide) in paragraph at lines 53--54
+[][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (201.00555pt too wide) in paragraph at lines 54--55
+[][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 75--76
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[11]
+Overfull \hbox (45.00397pt too wide) in paragraph at lines 83--84
+[][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 107--110
+[][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 111--112
+[][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (39.0039pt too wide) in paragraph at lines 112--114
+[][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[12]
+Overfull \hbox (9.0036pt too wide) in paragraph at lines 131--132
+[][][][][][][][][] 
+ []
+
+
+Overfull \hbox (51.00403pt too wide) in paragraph at lines 132--134
+[][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (21.00372pt too wide) in paragraph at lines 134--136
+[][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (3.00354pt too wide) in paragraph at lines 141--142
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (3.00354pt too wide) in paragraph at lines 145--146
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (69.00421pt too wide) in paragraph at lines 147--148
+[][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (21.00372pt too wide) in paragraph at lines 148--149
+[][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (3.00354pt too wide) in paragraph at lines 153--154
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (3.00354pt too wide) in paragraph at lines 157--158
+[][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (87.0044pt too wide) in paragraph at lines 164--165
+[][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (87.0044pt too wide) in paragraph at lines 165--166
+[][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (123.00476pt too wide) in paragraph at lines 168--169
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (123.00476pt too wide) in paragraph at lines 169--172
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[13]
+Overfull \hbox (207.00562pt too wide) in paragraph at lines 193--195
+[][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+) <./Radial_acceleration_polar.png, id=53, 578.16pt x 433.62pt>
+File: ./Radial_acceleration_polar.png Graphic file (type png)
+
+<use ./Radial_acceleration_polar.png>
+<./Tangential_acceleration_polar.png, id=54, 578.16pt x 433.62pt>
+File: ./Tangential_acceleration_polar.png Graphic file (type png)
+
+<use ./Tangential_acceleration_polar.png>
+<./Radial_acceleration_linear.png, id=55, 578.16pt x 433.62pt>
+File: ./Radial_acceleration_linear.png Graphic file (type png)
+
+<use ./Radial_acceleration_linear.png>
+<./Tangential_acceleration_linear.png, id=56, 578.16pt x 433.62pt>
+File: ./Tangential_acceleration_linear.png Graphic file (type png)
+
+<use ./Tangential_acceleration_linear.png> [14] [15 <./Radial_acceleration_pola
+r.png> <./Tangential_acceleration_polar.png> <./Radial_acceleration_linear.png>
+ <./Tangential_acceleration_linear.png>]
+Overfull \hbox (47.047pt too wide) in paragraph at lines 176--188
+[][] 
+ []
+
+<./time_plot.png, id=67, 578.16pt x 433.62pt>
+File: ./time_plot.png Graphic file (type png)
+ <use ./time_plot.png> [16
+
+ <./time_plot.png>] (./Documented_flow.aux) ) 
+Here is how much of TeX's memory you used:
+ 3242 strings out of 256216
+ 47818 string characters out of 1917072
+ 121104 words of memory out of 1500000
+ 6477 multiletter control sequences out of 10000+200000
+ 9168 words of font info for 32 fonts, out of 1200000 for 2000
+ 645 hyphenation exceptions out of 8191
+ 35i,9n,52p,420b,1704s stack positions out of 5000i,500n,6000p,200000b,15000s
+</usr/share/texmf/fonts/type1/blue
+sky/cm/cmbx10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmbx12.pfb></usr/sha
+re/texmf/fonts/type1/bluesky/cm/cmbx7.pfb></usr/share/texmf/fonts/type1/bluesky
+/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmmi12.pfb></usr/share/
+texmf/fonts/type1/bluesky/cm/cmmi7.pfb></usr/share/texmf/fonts/type1/bluesky/cm
+/cmr10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf
+/fonts/type1/bluesky/cm/cmr17.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr7
+.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsy10.pfb></usr/share/texmf/font
+s/type1/bluesky/cm/cmti10.pfb>
+Output written on Documented_flow.pdf (16 pages, 531780 bytes).
+PDF statistics:
+ 112 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 131072)
+ 26 words of extra memory for PDF output out of 10000 (max. 10000000)
+
