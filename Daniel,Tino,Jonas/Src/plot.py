@@ -11,9 +11,9 @@ hold(False)
 """
 Make plot of density
 """
-density=loadtxt("../../../Data/density_project.data")
-r=loadtxt("../../../Data/r_project.data")
-theta=loadtxt("../../../Data/theta_project.data")
+density=loadtxt("../Data/density_project.data")
+r=loadtxt("../Data/r_project.data")
+theta=loadtxt("../Data/theta_project.data")
 dim_r=len(r)
 dim_theta=len(theta)
 dens=zeros((dim_r,dim_theta))
@@ -29,12 +29,12 @@ for j in arange(0,dim_theta):
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/Density.png")
+#savefig("Res/Density.png")
         
 """
 Make plots of force level 0 
 """
-force0=loadtxt("../Res/force0_project.data")
+force0=loadtxt("Res/force0_project.data")
 
 dr=r[1]-r[0]
 r=r-dr/2
@@ -58,7 +58,7 @@ F0=sqrt(ftheta0**2+fr0**2)
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/Force_0.png")
+#savefig("Res/Force_0.png")
 
 #pcolormesh(theta,r,fr0)
 #title('$Force_r$ $Level$ $0$')
@@ -67,7 +67,7 @@ F0=sqrt(ftheta0**2+fr0**2)
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/Force_r_0.png")
+#savefig("Res/Force_r_0.png")
 
 #pcolormesh(theta,r,ftheta0)
 #title('$Force_theta$ $Level$ $0$')
@@ -76,12 +76,12 @@ F0=sqrt(ftheta0**2+fr0**2)
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/Force_theta_0.png")
+#savefig("Res/Force_theta_0.png")
 
 """
 Make plots of force level l 
 """
-forcel=loadtxt("../Res/force_project.data")
+forcel=loadtxt("Res/force_project.data")
 
 fthetal=zeros((dim_r,dim_theta))
 frl=zeros((dim_r,dim_theta))
@@ -100,7 +100,7 @@ Fl=sqrt(fthetal**2+frl**2)
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/Force_l.png")
+#savefig("Res/Force_l.png")
 
 #pcolormesh(theta,r,frl)
 #title('$Force_r$ $Level$ $l$')
@@ -109,7 +109,7 @@ Fl=sqrt(fthetal**2+frl**2)
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/Force_r_l.png")
+#savefig("Res/Force_r_l.png")
 
 #pcolormesh(theta,r,fthetal)
 #title('$Force_theta$ $Level$ $l$')
@@ -118,7 +118,7 @@ Fl=sqrt(fthetal**2+frl**2)
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/Force_theta_l.png")
+#savefig("Res/Force_theta_l.png")
 
 """
 Make plots of force level l-0 differences 
@@ -135,7 +135,7 @@ dFl=Fl-F0
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/dForce_l.png")
+#savefig("Res/dForce_l.png")
 
 #pcolormesh(theta,r,dfrl)
 #title('$\Delta F_r$ $Level$ $l$')
@@ -144,7 +144,7 @@ dFl=Fl-F0
 #ylim([r[0],r[dim_r-1]])
 #xlim([theta[0],theta[dim_theta-1]])
 #colorbar()
-#savefig("../Res/dForce_r_l.png")
+#savefig("Res/dForce_r_l.png")
 
 pcolormesh(theta,r,fthetal)
 title('$\Delta F_\Theta$ $Level$ $l$')
@@ -153,7 +153,7 @@ xlabel('$Azimuth$ $\Theta$ [$rad$]')
 ylim([r[0],r[dim_r-1]])
 xlim([theta[0],theta[dim_theta-1]])
 colorbar()
-savefig("../Res/dForce_theta_l.png")
+savefig("Res/dForce_theta_l.png")
 
 
 

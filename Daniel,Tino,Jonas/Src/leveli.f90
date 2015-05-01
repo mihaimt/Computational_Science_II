@@ -56,19 +56,19 @@ allocate(force(2,dim_r,dim_theta))
 
 
 ! load data 
-open(unit=1,file="Data/r_project.data")
+open(unit=1,file="../Data/r_project.data")
 do k=1,dim_r
 	read(1,'(e20.10)') r0(k)
 end do
 close(1)
 
-open(unit=2,file="Data/theta_project.data")
+open(unit=2,file="../Data/theta_project.data")
 do l=1,dim_theta
 	read(2,'(e20.10)') theta0(l)
 end do
 close(2)
 
-open(unit=3,file="Data/density_project.data")
+open(unit=3,file="../Data/density_project.data")
 do k=1,dim_r
 	do l=1,dim_theta
 		read(3,'(e20.10)') density(k,l)
@@ -147,10 +147,10 @@ write(*,*) t,"seconds"
 
 ! calculate force
 call CPU_Time(t_start)	
-do j=1,dim_theta
+do j=1,4!dim_theta
 	!v=mod(j-1,l_size)............
 	v=mod(mod(j,l_size)+l_size-1,l_size)
-	do i=1,dim_r
+	do i=1,4!dim_r
 		dforce_r=0.0
 		dforce_theta=0.0
 		!u=mod(i-1,l_size)................
@@ -164,23 +164,27 @@ do j=1,dim_theta
 		!write(*,*) a,b,c,d
 		write(*,*) "-----------------------"
 		var4=0.0
-		do l=1+l_hsize,dim_theta,l_size
-			do k=1+l_hsize,dim_r,l_size
+		do l=1+l_hsize,4,l_size!dim_theta
+			do k=1+l_hsize,4,l_size!dim_r
 				if(k+l_size<=dim_r.and.l+l_size<=dim_theta) then
 					write(*,*) "             ","-------------------------"
-					write(*,*) "              ",k+u,l+v
+					write(*,*) "              ", k+u,l+v
 					write(*,*) "             ","-------------------------"
 					if(aa>0) then
 						var4=var4+aa*mass(level,k,l)
+						write(*,*) "                            ",k,l
 					end if
 					if(bb>0) then
 						var4=var4+bb*mass(level,k+l_size,l)
+						write(*,*) "                            ",k+l_size,l
 					end if
 					if(cc>0) then
 						var4=var4+cc*mass(level,k,l+l_size)
+						write(*,*) "                            ",k,l+l_size
 					end if
 					if(dd>0) then
 						var4=var4+dd*mass(level,k+l_size,l+l_size)
+						write(*,*) "                            ",k+l_size,l+l_size
 					end if		
 
 					var0=cos_dtheta(j,l+v)
