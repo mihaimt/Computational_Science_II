@@ -56,19 +56,19 @@ allocate(force(2,dim_r,dim_theta))
 
 
 ! load data 
-open(unit=1,file="../../Data/r_project.data")
+open(unit=1,file="Data/r_project.data")
 do k=1,dim_r
 	read(1,'(e20.10)') r0(k)
 end do
 close(1)
 
-open(unit=2,file="../../Data/theta_project.data")
+open(unit=2,file="Data/theta_project.data")
 do l=1,dim_theta
 	read(2,'(e20.10)') theta0(l)
 end do
 close(2)
 
-open(unit=3,file="../../Data/density_project.data")
+open(unit=3,file="Data/density_project.data")
 do k=1,dim_r
 	do l=1,dim_theta
 		read(3,'(e20.10)') density(k,l)
