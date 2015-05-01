@@ -153,17 +153,21 @@ do j=1,dim_theta
 		dforce_r=0.0
 		dforce_theta=0.0
 		u=mod(mod(i,l_size)+l_size-1,l_size)
-		!write(*,*) u,v
+		write(*,*) "-----------------------"
+		write(*,*) u,v
 		aa=real((l_size-v)*(l_size-u))/l_size**2
 		bb=real(u*(l_size-v))/l_size**2
 		cc=real(v*(l_size-u))/l_size**2
 		dd=real(v*u)/l_size**2
-		!write(*,*) aa,bb,cc,dd
-		!write(*,*) " "
+		!write(*,*) a,b,c,d
+		write(*,*) "-----------------------"
 		var4=0.0
 		do l=1+l_hsize,dim_theta,l_size
 			do k=1+l_hsize,dim_r,l_size
 				if(k+l_size<=dim_r.and.l+l_size<=dim_theta) then
+					write(*,*) "             ","-------------------------"
+					write(*,*) "              ",k+u,l+v
+					write(*,*) "             ","-------------------------"
 					if(aa>0) then
 						var4=var4+aa*mass(level,k,l)
 					end if
@@ -186,7 +190,7 @@ do j=1,dim_theta
 					dforce_r=dforce_r+(var2-var0)*var3
 					dforce_theta=dforce_theta+var1*var3
 				end if
-				
+				write(*,*) "             ","-------------------------"				
 			end do
 		end do
 		!write(*,*) " "
