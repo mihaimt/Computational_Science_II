@@ -9,29 +9,32 @@ import matplotlib.pyplot as plt
 from numpy import zeros
 
 max_level = 3
+
 # define the paths to the files
-r_path = "./data/r_project.data"
-theta_path = "./data/theta_project.data"
-density_path = "./data/density_project.data"
-#force_r_path = "./data/f_radial.data"
-#force_theta_path = "./data/f_angular.data"
+r_path = "../data/r_project.data"
+theta_path = "../data/theta_project.data"
+density_path = "../data/density_project.data"
+#force_r_path = "../data/f_radial.data"
+#force_theta_path = "../data/f_angular.data"
 force_lvl_r_paths = list()
 force_lvl_theta_paths = list()
 for i in range(max_level+1):
-    r = "./data/f_radial_lvl"+str(i)+".data"
-    t = "./data/f_angular_lvl"+str(i)+".data"
+    r = "../data/f_radial_lvl"+str(i)+".data"
+    t = "../data/f_angular_lvl"+str(i)+".data"
     force_lvl_r_paths.append(r)
     force_lvl_theta_paths.append(t)
 for i in range(max_level+1):
-    r = "./data/radial_osc_mass_lvl"+str(i)+".data"
-    t = "./data/angular_osc_mass_lvl"+str(i)+".data"
+    r = "../data/radial_osc_mass_lvl"+str(i)+".data"
+    t = "../data/angular_osc_mass_lvl"+str(i)+".data"
     force_lvl_r_paths.append(r)
     force_lvl_theta_paths.append(t)
-for i in range(max_level+1):
-    r = "./data/radial_osc_force_lvl"+str(i)+".data"
-    t = "./data/angular_osc_force_lvl"+str(i)+".data"
-    force_lvl_r_paths.append(r)
-    force_lvl_theta_paths.append(t)
+#for i in range(max_level+1):
+#    r = "../data/radial_osc_force_lvl"+str(i)+".data"
+#    t = "../data/angular_osc_force_lvl"+str(i)+".data"
+#    force_lvl_r_paths.append(r)
+#    force_lvl_theta_paths.append(t)
+diff_path = "../data/rad_m3_to_f3.data"
+
 
 def read_path(path):
     """
@@ -135,7 +138,7 @@ def plot_force_angular(force, r, theta, name):
 
 if __name__ == "__main__":
 
-    # read data
+# read data
     r = read_path(r_path)
     theta = read_path(theta_path)
     density = read_path(density_path)
@@ -149,26 +152,34 @@ if __name__ == "__main__":
         force_lvl_r.append(read_path(s))
     for s in force_lvl_theta_paths:
         force_lvl_theta.append(read_path(s))
+
+    diff = read_path(diff_path)
+
         
-    # plots
-    #plot_density(density, r, theta, './pictures/density.png')
-    #plot_force_radial(force_r, r, theta, './pictures/radial_force.png')
-    #plot_force_angular(force_theta, r, theta, './pictures/angular_force.png')
+# plots
+    #plot_density(density, r, theta, '../pictures/density.png')
+    #plot_force_radial(force_r, r, theta, '../pictures/radial_force.png')
+    #plot_force_angular(force_theta, r, theta, '../pictures/angular_force.png')
+
     for d in range(max_level+1):
-        rstring = "./pictures/radial_force_lvl"+str(d)+".png"
+        rstring = "../pictures/radial_force_lvl"+str(d)+".png"
         plot_force_radial(force_lvl_r[d], r, theta, rstring)
     for d in range(max_level+1):
-        tstring = "./pictures/angular_force_lvl"+str(d)+".png"
+        tstring = "../pictures/angular_force_lvl"+str(d)+".png"
         plot_force_angular(force_lvl_theta[d], r, theta, tstring)
+
     for d in range(max_level+1):
-        rstring = "./pictures/osc_mass_radial_lvl"+str(d)+".png"
+        rstring = "../pictures/osc_mass_radial_lvl"+str(d)+".png"
         plot_force_radial(force_lvl_r[1*(max_level+1)+d], r, theta, rstring)
     for d in range(max_level+1):
-        tstring = "./pictures/osc_mass_angular_lvl"+str(d)+".png"
+        tstring = "../pictures/osc_mass_angular_lvl"+str(d)+".png"
         plot_force_angular(force_lvl_theta[1*(max_level+1)+d], r, theta, tstring)
-    for d in range(max_level+1):
-        rstring = "./pictures/osc_force_radial_lvl"+str(d)+".png"
-        plot_force_radial(force_lvl_r[2*(max_level+1)+d], r, theta, rstring)
-    for d in range(max_level+1):
-        tstring = "./pictures/osc_force_angular_lvl"+str(d)+".png"
-        plot_force_angular(force_lvl_theta[2*(max_level+1)+d], r, theta, tstring)
+
+#    for d in range(max_level+1):
+#        rstring = "./pictures/osc_force_radial_lvl"+str(d)+".png"
+#        plot_force_radial(force_lvl_r[2*(max_level+1)+d], r, theta, rstring)
+#    for d in range(max_level+1):
+#        tstring = "./pictures/osc_force_angular_lvl"+str(d)+".png"
+#        plot_force_angular(force_lvl_theta[2*(max_level+1)+d], r, theta, tstring)
+
+    plot_force_radial(diff, r, theta, '../pictures/diff_m3_to_f3.png')
