@@ -123,6 +123,7 @@ call create_real_DensityGrid(density_grid,dim_r,dim_theta,density_grid_Level1,di
 
 
 
+
 do i=2,256,2
 	do j=2,128,2
 		call force_even_even(j,i,dim_r,dim_theta, r,theta,dim_theta_primeLevel1, &
@@ -157,6 +158,15 @@ do i=1,256,2
 end do
 
 
+!do i=1,256,1
+!	do j=1,128,1
+!		call force_odd_odd(j,i,dim_r,dim_theta, r,theta,dim_theta, &
+!			dim_r, density_grid, force_grid_r, force_grid_t, &
+!			r_prime,theta_prime)
+!	end do
+!end do
+
+
 !.................................................................................
 			
 call cpu_time(t3)
@@ -168,8 +178,9 @@ write(*,*) t3-t2
 open(unit=4,file="forcegrid_rcomponent.txt")
 open(unit=5,file="forcegrid_thetacomponent.txt")
 
-do i=1,256
-	do j=1,128
+	do i=1,256
+do j=1,128
+	
 		write(4,'(e20.10)') force_grid_r(j,i)
 		write(5,'(e20.10)') force_grid_t(j,i)
 	
