@@ -147,44 +147,42 @@ write(*,*) t,"seconds"
 
 ! calculate force
 call CPU_Time(t_start)	
-do j=1,4!dim_theta
-	!v=mod(j-1,l_size)............
-	v=mod(mod(j,l_size)+l_size-1,l_size)
-	do i=1,4!dim_r
+do j=1,dim_theta
+	v=mod(j-1,l_size)
+	do i=1,dim_r
 		dforce_r=0.0
 		dforce_theta=0.0
-		!u=mod(i-1,l_size)................
-		u=mod(mod(i,l_size)+l_size-1,l_size)
-		write(*,*) "-----------------------"
-		write(*,*) u,v
+		u=mod(i-1,l_size)
+		!write(*,*) "-----------------------"
+		!write(*,*) u,v
 		aa=real((l_size-v)*(l_size-u))/l_size**2
 		bb=real(u*(l_size-v))/l_size**2
 		cc=real(v*(l_size-u))/l_size**2
 		dd=real(v*u)/l_size**2
 		!write(*,*) a,b,c,d
-		write(*,*) "-----------------------"
+		!write(*,*) "-----------------------"
 		var4=0.0
-		do l=1+l_hsize,4,l_size!dim_theta
-			do k=1+l_hsize,4,l_size!dim_r
+		do l=1+l_hsize,dim_theta,l_size!dim_theta
+			do k=1+l_hsize,dim_r,l_size!dim_r
 				if(k+l_size<=dim_r.and.l+l_size<=dim_theta) then
-					write(*,*) "             ","-------------------------"
-					write(*,*) "              ", k+u,l+v
-					write(*,*) "             ","-------------------------"
+					!write(*,*) "             ","-------------------------"
+					!write(*,*) "              ", k+u,l+v
+					!write(*,*) "             ","-------------------------"
 					if(aa>0) then
 						var4=var4+aa*mass(level,k,l)
-						write(*,*) "                            ",k,l
+						!write(*,*) "                            ",k,l
 					end if
 					if(bb>0) then
 						var4=var4+bb*mass(level,k+l_size,l)
-						write(*,*) "                            ",k+l_size,l
+						!write(*,*) "                            ",k+l_size,l
 					end if
 					if(cc>0) then
 						var4=var4+cc*mass(level,k,l+l_size)
-						write(*,*) "                            ",k,l+l_size
+						!write(*,*) "                            ",k,l+l_size
 					end if
 					if(dd>0) then
 						var4=var4+dd*mass(level,k+l_size,l+l_size)
-						write(*,*) "                            ",k+l_size,l+l_size
+						!write(*,*) "                            ",k+l_size,l+l_size
 					end if		
 
 					var0=cos_dtheta(j,l+v)
@@ -196,7 +194,7 @@ do j=1,4!dim_theta
 					dforce_r=dforce_r+(var2-var0)*var3
 					dforce_theta=dforce_theta+var1*var3
 				end if
-				write(*,*) "             ","-------------------------"				
+				!write(*,*) "             ","-------------------------"				
 			end do
 		end do
 		!write(*,*) " "
