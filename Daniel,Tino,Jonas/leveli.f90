@@ -148,10 +148,12 @@ write(*,*) t,"seconds"
 ! calculate force
 call CPU_Time(t_start)	
 do j=1,dim_theta
+	!v=mod(j-1,l_size)............
 	v=mod(mod(j,l_size)+l_size-1,l_size)
 	do i=1,dim_r
 		dforce_r=0.0
 		dforce_theta=0.0
+		!u=mod(i-1,l_size)................
 		u=mod(mod(i,l_size)+l_size-1,l_size)
 		write(*,*) "-----------------------"
 		write(*,*) u,v

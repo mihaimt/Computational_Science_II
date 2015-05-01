@@ -46,9 +46,9 @@ do index_thetaPrime=1,dim_theta_prime-1,1
 		r_p=(r_prime(index_rPrime)+r_prime(index_rPrime+1))*0.5
 		R_temp=r_achse(r)/r_p
 		dR=-r_achse(r)/(r_p*r_p)
-		dens=density_grid(index_rPrime,index_thetaPrime)+density_grid(index_rPrime,index_thetaPrime+1) &
-			+ density_grid(index_rPrime+1,index_thetaPrime)+ density_grid(index_rPrime+1,index_thetaPrime+1)
-		dens=dens*0.25
+		dens=4*density_grid(index_rPrime,index_thetaPrime)+2*density_grid(index_rPrime,index_thetaPrime+1) &
+			+ 2*density_grid(index_rPrime+1,index_thetaPrime)+ 1*density_grid(index_rPrime+1,index_thetaPrime+1)
+		dens=dens/9
 		numerator=dens*dR
 		denominator=(1+R_temp*(R_temp-2*cos_temp))
 		denominator=denominator*sqrt(denominator)*R_temp+surpress_divergent
