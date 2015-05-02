@@ -16,7 +16,7 @@ integer::l_hsize
 integer::i,j,k,l,u,v
 real::t_start,t_end,t
 real::var0,var1,var2,var3,var4
-real::aa,bb,cc,dd
+real::a,b,c,d,e
 
 real::G=1
 real::dr,dtheta
@@ -127,14 +127,12 @@ end do
 	
 do k=1+l_hsize,dim_r,l_size
 	do l=1+l_hsize,dim_theta,l_size
-	!write(*,*) k,l
 
         do i=k-l_hsize,k+l_hsize-1
             do j=l-l_hsize,l+l_hsize-1
                 mass(level,k,l)=mass(level,k,l)-G*density(i,j)*dr*dtheta
             end do
         end do
-	!write(*,*) mass(level,k,l)
     
 	end do
 end do
@@ -149,44 +147,36 @@ write(*,*) t,"seconds"
 call CPU_Time(t_start)	
 do j=1,dim_theta
 	v=mod(j-1,l_size)
-	do i=1,dim_r
+	do i=1,dim_theta
 		dforce_r=0.0
 		dforce_theta=0.0
 		u=mod(i-1,l_size)
-		!write(*,*) "-----------------------"
-		!write(*,*) u,v
-		aa=real((l_size-v)*(l_size-u))/l_size**2
-		bb=real(u*(l_size-v))/l_size**2
-		cc=real(v*(l_size-u))/l_size**2
-		dd=real(v*u)/l_size**2
-		!write(*,*) a,b,c,d
-		!write(*,*) "-----------------------"
-		var4=0.0
-		do l=1+l_hsize,dim_theta,l_size!dim_theta
-			do k=1+l_hsize,dim_r,l_size!dim_r
-				if(k+l_size<=dim_r.and.l+l_size<=dim_theta) then
-					!write(*,*) "             ","-------------------------"
-					!write(*,*) "              ", k+u,l+v
-					!write(*,*) "             ","-------------------------"
-					if(aa>0) then
-						var4=var4+aa*mass(level,k,l)
-						!write(*,*) "                            ",k,l
-					end if
-					if(bb>0) then
-						var4=var4+bb*mass(level,k+l_size,l)
-						!write(*,*) "                            ",k+l_size,l
-					end if
-					if(cc>0) then
-						var4=var4+cc*mass(level,k,l+l_size)
-						!write(*,*) "                            ",k,l+l_size
-					end if
-					if(dd>0) then
-						var4=var4+dd*mass(level,k+l_size,l+l_size)
-						!write(*,*) "                            ",k+l_size,l+l_size
-					end if		
 
+		a=real((l_size-v)*(l_size-u))
+		b=real(u*(l_size-v))
+		c=real(v*(l_size-u))
+		d=real(v*u)
+		e=1.0/l_size**2
+	
+		var4=0.0
+		do l=1+l_hsize,dim_theta,l_size
+			do k=1+l_hsize,dim_r,l_size
+				if(k+l_size<=dim_r.and.l+l_size<=dim_theta) then
 					var0=cos_dtheta(j,l+v)
 					var1=sin_dtheta(j,l+v)
+					if(a>0) then
+						var4=var4+a*mass(level,k,l)
+					end if
+					if(b>0) then
+						var4=var4+b*mass(level,k+l_size,l)
+					end if
+					if(c>0) then
+						var4=var4+c*mass(level,k,l+l_size)
+					end if
+					if(d>0) then
+						var4=var4+d*mass(level,k+l_size,l+l_size)
+					end if		
+					var4=var4*e
 					var2=r_sub(i,k+u)
 					var3=1+var2*var2-2*var2*var0
 					var3=var3*sqrt(var3)
@@ -194,13 +184,40 @@ do j=1,dim_theta
 					dforce_r=dforce_r+(var2-var0)*var3
 					dforce_theta=dforce_theta+var1*var3
 				end if
-				!write(*,*) "             ","-------------------------"				
+				if(k+l_size<=dim_r.and.l+l_size>dim_theta) then
+
+					if(l+v<=dim_theta) then
+						var0=cos_dtheta(j,l+v)
+						var1=sin_dtheta(j,l+v)
+					else
+						var0=cos_dtheta(j,l+v-dim_theta)
+						var1=sin_dtheta(j,l+v-dim_theta)
+					end if
+
+					if(a>0) then
+						var4=var4+a*mass(level,k,l)
+					end if
+					if(b>0) then
+						var4=var4+b*mass(level,k+l_size,l)
+					end if
+					if(c>0) then
+						var4=var4+c*mass(level,k,l+l_size-dim_theta)
+					end if
+					if(d>0) then
+						var4=var4+d*mass(level,k+l_size,l+l_size-dim_theta)
+					end if		
+					var4=var4*e
+					var2=r_sub(i,k+u)
+					var3=1+var2*var2-2*var2*var0
+					var3=var3*sqrt(var3)
+					var3=var4/var3/r(k+u)
+					dforce_r=dforce_r+(var2-var0)*var3
+					dforce_theta=dforce_theta+var1*var3	
+				end if		
 			end do
 		end do
-		!write(*,*) " "
 		force(1,i,j)=dforce_r
 		force(2,i,j)=dforce_theta
-		!write(*,*) force(1,i,j),force(2,i,j)
 	end do 
 end do
 call CPU_Time(t_end)				
