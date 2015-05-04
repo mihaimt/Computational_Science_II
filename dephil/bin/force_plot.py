@@ -33,7 +33,8 @@ for i in range(max_level+1):
 #    t = "../data/angular_osc_force_lvl"+str(i)+".data"
 #    force_lvl_r_paths.append(r)
 #    force_lvl_theta_paths.append(t)
-diff_path = "../data/rad_m3_to_f3.data"
+
+#diff_path = "../data/rad_m3_to_f3.data"
 
 
 def read_path(path):
@@ -153,7 +154,7 @@ if __name__ == "__main__":
     for s in force_lvl_theta_paths:
         force_lvl_theta.append(read_path(s))
 
-    diff = read_path(diff_path)
+#    diff = read_path(diff_path)
 
         
 # plots
@@ -182,4 +183,4 @@ if __name__ == "__main__":
 #        tstring = "./pictures/osc_force_angular_lvl"+str(d)+".png"
 #        plot_force_angular(force_lvl_theta[2*(max_level+1)+d], r, theta, tstring)
 
-    plot_force_radial(diff, r, theta, '../pictures/diff_m3_to_f3.png')
+#    plot_force_radial(diff, r, theta, '../pictures/diff_m3_to_f3.png')

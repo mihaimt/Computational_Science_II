@@ -81,9 +81,8 @@ PROGRAM grav_force_lvlx
             ! sum up the forces on the point (i, j)
             do iprime = 1, N_rx
                 do jprime = 1, N_thetax
-                    ! formula for the gravitational force split into four parts for faster calculation
-                            ! expressed in terms of ratios of r
-                            ! F_grav = Sum ( Mass / (r_iprime*sqrt(1+r_ratio_squared-2*r_ratio*cos))³/² ) * r_iprime | (r_ratio - cos), (sin)
+                    ! formula for the gravitational force split into four parts for faster calculation expressed in terms of ratios of r
+                    ! F_grav = Sum ( Mass / (r_iprime*sqrt(1+r_ratio_squared-2*r_ratio*cos))³/² ) * r_iprime | (r_ratio - cos), (sin)
 
                     !denom_point = InvSqrt(1+r1_ratio_squared(i, iprime)-2*r1_ratio(i, iprime)*cos_table1(j, jprime)+epsilon2)
                     denom_point = (1+rx_ratio_squared(i, iprime)-2*rx_ratio(i, iprime)*cos_tablex(j, jprime)+epsilon2)
@@ -97,10 +96,8 @@ PROGRAM grav_force_lvlx
                             &*sin_tablex(j, jprime)
                 end do
             end do
-            !do jprime = 1, 2**LEVEL
-                write(11, '(e20.10)') f_rx
-                write(12, '(e20.10)') f_thetax
-            !end do
+            write(11, '(e20.10)') f_rx
+            write(12, '(e20.10)') f_thetax
             f_rx = 0.
             f_thetax = 0.
         end do

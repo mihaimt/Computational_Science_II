@@ -17,7 +17,7 @@ PROGRAM oscillation_mass
     INTEGER :: LEVEL, factor_x
 
     REAL(8) :: inv_factor2, vmass, dr_shift, dtheta_shift, force_point, denom_point,&
-               &ratio, ratio_squared, cosine, sine, rprime, delta_theta!, denom_sqrt
+               &ratio, ratio_squared, cosine, sine, rprime, delta_theta
 
     REAL :: start, finish
 
@@ -69,21 +69,21 @@ PROGRAM oscillation_mass
 ! write force components for every corner in grid
     do i = 1, N_r0, factor_x
         do j = 1, N_theta0, factor_x
-            ! sum up the forces on the point (i, j)
+            ! sum up the forces at the point (i, j)
             do ishift = 0, factor_x-1
-                shifted_i = i+ishift
-                dr_shift = r0(shifted_i)-.5*dr0(shifted_i)-r0(i)+dr0(i)
+                shifted_i = i+ishift    ! index to the point shifted from the corner where the force is summed up
+                dr_shift = r0(shifted_i)-r0(i)   ! distance of shift in r
                 do jshift = 0, factor_x-1
-                    shifted_j = j+jshift
-                    dtheta_shift = theta0(j+jshift)-theta0(j)
+                    shifted_j = j+jshift    ! index to the point shifted from the corner where the force is summed up
+                    dtheta_shift = theta0(shifted_j)-theta0(j)   ! distance of shift in theta
                     do iprime = 1, N_rx
-                        rprime = rx(iprime)+dr_shift
-                        ratio = (r0(shifted_i)-.5*dr0(i))/rprime
+                        rprime = rx(iprime)+dr_shift   ! shift the position of the masses
+                        ratio = (r0(shifted_i)-.5*dr0(shifted_i))/rprime
                         ratio_squared = ratio*ratio
-                        rprime = rprime*rprime
+                        rprime = rprime*rprime    ! iprime squared for later...
                         do jprime = 1, N_thetax
                             ! formula for the gravitational force split into four parts for faster calculation expressed in terms of ratios of r
-                            ! F_grav = Sum ( Mass / (r_iprime*sqrt(1+r_ratio_squared-2*r_ratio*cos))³/² ) * r_iprime | (r_ratio - cos), (sin)
+                            ! F_grav = Sum ( Mass / (r_iprime³*sqrt(1+r_ratio_squared-2*r_ratio*cos))³/² ) * r_iprime | (r_ratio - cos), (sin)
                             vmass = ( (factor_x-ishift) * (factor_x-jshift)  * massx(iprime, jprime)+ &
                                      & ishift  * (factor_x-jshift)         * massx(iprime+1, jprime)+ &
                                      & (factor_x-ishift) * jshift          * massx(iprime, jprime+1)+ &
@@ -91,10 +91,10 @@ PROGRAM oscillation_mass
                                      &)*inv_factor2
                             ! variables depending on iprime, jprime have to be shifted according to dr_shift / dtheta_shift
                             ! rx_ratio_squared(i,iprime) ; rx_ratio(i,iprime) ; cos_tablex(j,jprime) ; rx_prime_squared(iprime) ; sin_tablex(j,jprime)
-                            delta_theta = theta0(shifted_j)-.5*dtheta0(shifted_j)-thetax(jprime)-dtheta_shift
+                            delta_theta = theta0(shifted_j)-.5*dtheta0(shifted_j)-thetax(jprime)-dtheta_shift   ! theta - theta_prime
                             cosine = cos(delta_theta)
                             sine = sin(delta_theta)
-                            denom_point = 1+ratio_squared-2*ratio*cosine
+                            denom_point = 1.+ratio_squared-2.*ratio*cosine    ! denominator
                             denom_point = sqrt(denom_point)*denom_point*rprime
                             force_point = vmass/denom_point
                             force_r(shifted_i, shifted_j) = force_r(shifted_i, shifted_j) + force_point&
