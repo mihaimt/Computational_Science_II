@@ -30,8 +30,8 @@ PROGRAM grav_force
     open(unit=8, file='./data/r_project.data', status='old', action='read')
     open(unit=9, file='./data/theta_project.data', status='old', action='read')
     open(unit=10, file='./data/density_project.data', status='old', action='read')
-    open(unit=11, file='./data/f_radial.data', status='old', action='write')
-    open(unit=12, file='./data/f_angular.data', status='old', action='write')
+    open(unit=11, file='./data/f_radial.data', action='write')
+    open(unit=12, file='./data/f_angular.data', action='write')
 
 ! read radii into 1-D array
     do i = 1, N_r
@@ -105,6 +105,7 @@ PROGRAM grav_force
         end do
     end do
 
+    write(*,*)"Calculating force..."
 ! write force components for every corner in grid
     do i = 1, N_r
         do j = 1, N_theta

@@ -62,6 +62,7 @@ PROGRAM oscillation_force
 ! fill the <mass table> for LEVEL 1
     call calc_masslvlx(LEVEL, N_r0, N_theta0, mass0, massx)
 
+    write(*,*)"Calculating level "//arg//" without oscillation..."
 ! write force components for every corner in grid
     do i = 1, N_r0, factor_x
         do j = 1, N_theta0, factor_x

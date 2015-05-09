@@ -17,10 +17,11 @@ MODULE grav_precalcs
             INTEGER, intent(in) :: N_r0, N_theta0
             REAL(8), DIMENSION(N_r0), intent(in) :: r0
             REAL(8), DIMENSION(N_theta0), intent(in) :: theta0
-            REAL(8), DIMENSION(N_r0), intent(out) :: dr0, r0_squared, r0_prime_squared
+            REAL(8), DIMENSION(N_r0), intent(out) :: dr0
             REAL(8), DIMENSION(N_r0, N_r0), intent(out) :: r0_ratio, r0_ratio_squared
             REAL(8), DIMENSION(N_theta0), intent(out) :: dtheta0
             REAL(8), DIMENSION(1-N_theta0:N_theta0-1), intent(out) :: cos_table0, sin_table0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(out) :: r0_squared, r0_prime_squared
             ! Local variables
             INTEGER :: i, j, iprime, jprime     ! iterators
             REAL(8) :: r0_i, r0_iprime, theta0_j, diff_theta
@@ -35,6 +36,7 @@ MODULE grav_precalcs
             end do
             dtheta0(N_theta0) = dtheta0(N_theta0-1)
             ! <r²> in the corners and <r'²> in the centres for LEVEL0   - r² indicates corners and r'² indicates centers of the cells
+            allocate(r0_squared(N_r0), r0_prime_squared(N_r0))
             do i = 1, N_r0
                 r0_i = r0(i)-.5*dr0(i) ! shift r to the corners
                 r0_squared(i) = r0_i*r0_i
@@ -58,7 +60,6 @@ MODULE grav_precalcs
                     sin_table0(j-jprime) = sin(diff_theta)
                 end do
             end do
-
         END SUBROUTINE precalcs_lvl0
 
 
@@ -90,42 +91,40 @@ MODULE grav_precalcs
             N_rlvl=N_r0/factor_lvl
             N_thetalvl=N_theta0/factor_lvl
 
-            allocate(drlvl(N_rlvl), rlvl_squared(N_rlvl), rlvl_prime_squared(N_rlvl))
-            allocate(dthetalvl(N_thetalvl))
-            allocate(rlvl_ratio(N_r0, N_rlvl), rlvl_ratio_squared(N_r0, N_rlvl))
-            allocate(cos_tablelvl(N_theta0, N_thetalvl), sin_tablelvl(N_theta0, N_thetalvl))
+            allocate(drlvl(0:N_rlvl+1), rlvl_squared(0:N_rlvl+1), rlvl_prime_squared(0:N_rlvl+1))
+            allocate(dthetalvl(0:N_thetalvl+1))
+            allocate(rlvl_ratio(N_r0, 0:N_rlvl+1), rlvl_ratio_squared(N_r0, 0:N_rlvl+1))
+            allocate(cos_tablelvl(N_theta0, 0:N_thetalvl+1), sin_tablelvl(N_theta0, 0:N_thetalvl+1))
 
             ! different <dr/dtheta> for LEVEL X   - distances from centers of cells == cell widths
-            do i = 1, N_rlvl-1
+            do i = 0, N_rlvl
                 drlvl(i) = rlvl(i+1)-rlvl(i)
             end do
-            drlvl(N_rlvl) = drlvl(N_rlvl-1)
-            do j = 1, N_thetalvl-1
+            drlvl(N_rlvl+1) = drlvl(N_rlvl)
+            do j = 0, N_thetalvl!-1 ???
                 dthetalvl(j) = thetalvl(j+1)-thetalvl(j)
             end do
-            dthetalvl(N_thetalvl) = dthetalvl(N_thetalvl-1)
-
+            !dthetalvl(N_thetalvl) = dthetalvl(N_thetalvl-1)
+            dthetalvl(N_thetalvl+1) = dthetalvl(1)
             ! <r²> in the corners and <r'²> in the centres for LEVEL X   - r² indicates corners and r'² indicates centers of the cells
-            do i = 1, N_rlvl
+            do i = 0, N_rlvl+1
                 rlvl_i = rlvl(i)-.5*drlvl(i) ! shift r to the corners
                 rlvl_squared(i) = rlvl_i*rlvl_i
                 rlvl_prime_squared(i) = rlvl(i)*rlvl(i)
             end do
-
             ! <r ratios> and <r ratios squared> for LEVEL X   - ratios of r to r' from corners to centers of the cells
             do i = 1, N_r0
                 r0_i = r0(i)-.5*dr0(i) ! shift r to the corners
-                do iprime = 1, N_rlvl
+                do iprime = 0, N_rlvl+1
                     rlvl_iprime = r0_i/rlvl(iprime) ! r_iprime only used as temp
                     rlvl_ratio(i, iprime) = rlvl_iprime
                     rlvl_ratio_squared(i, iprime) = rlvl_iprime*rlvl_iprime
                 end do
             end do
-
             ! fill the <sin/cos table> for LEVEL X   - of differences of thetas from corner to centers of the cells
             do j = 1, N_theta0
                 theta0_j = theta0(j)-.5*dtheta0(j)
-                do jprime = 1, N_thetalvl
+                do jprime = 0, N_thetalvl+1
                     diff_theta = theta0_j-thetalvl(jprime)
                     cos_tablelvl(j, jprime) = cos(diff_theta)
                     sin_tablelvl(j, jprime) = sin(diff_theta)

@@ -15,7 +15,7 @@ MODULE grav_IO
             INTEGER, intent(in) :: N_r0, N_theta0
             REAL(8), DIMENSION(N_r0), intent(out) :: r0
             REAL(8), DIMENSION(N_theta0), intent(out) :: theta0
-            REAL(8), DIMENSION(N_r0, N_theta0), intent(out) :: sigma0
+            REAL(8), DIMENSION(:, :), ALLOCATABLE, intent(out) :: sigma0
             ! Local Variables
             INTEGER :: i, j     ! iterators
             REAL(8) :: temp     ! temporary variable
@@ -39,6 +39,7 @@ MODULE grav_IO
             end do
             close(unit=9)
             ! read <density> into 2-D array for LEVEL0
+            allocate(sigma0(N_r0,N_theta0))
             do i = 1, N_r0
                 do j = 1, N_theta0
                     read(10, '(e20.10)') temp
@@ -72,8 +73,8 @@ MODULE grav_IO
             N_rlvl=N_r0/factor_lvl
             N_thetalvl=N_theta0/factor_lvl
 
-            allocate(rlvl(N_rlvl))
-            allocate(thetalvl(N_thetalvl))
+            allocate(rlvl(0:N_rlvl+1))
+            allocate(thetalvl(0:N_thetalvl+1))
             allocate(sigmalvl(N_rlvl, N_thetalvl))
 
             ! READ IN LEVEL N_lvl ------------------
@@ -81,10 +82,14 @@ MODULE grav_IO
             do i = factor_lvl, N_r0, factor_lvl
                 rlvl(i/factor_lvl) = (r0(i)+r0(i-(factor_lvl-1)))*.5
             end do
+            rlvl(0) = rlvl(1)-(rlvl(2)-rlvl(1))
+            rlvl(N_rlvl+1) = rlvl(N_rlvl)+(rlvl(N_rlvl)-rlvl(N_rlvl-1))
             ! read <angles> into 1-D array for LEVEL X   - indicates center of the cells
             do j = factor_lvl, N_theta0, factor_lvl
                 thetalvl(j/factor_lvl) = (theta0(j)+theta0(j-(factor_lvl-1)))*.5
             end do
+            thetalvl(0) = thetalvl(N_thetalvl)
+            thetalvl(N_thetalvl+1) = thetalvl(1)
             ! read <density> into 2-D array for LEVEL X
             do i = factor_lvl, N_r0, factor_lvl
                 do j = factor_lvl, N_theta0, factor_lvl

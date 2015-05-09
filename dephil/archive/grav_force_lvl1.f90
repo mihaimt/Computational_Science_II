@@ -168,6 +168,8 @@ PROGRAM grav_force_lvl1
         end do
     end do
 
+    write(*,*)"Calculating level 1..."
+
 ! write force components for every corner in grid
     do i = 1, N_r0
         do j = 1, N_theta0

@@ -28,6 +28,8 @@ PROGRAM grav_force_lvlx
     call getarg(1, arg)
     read (arg, '(i5)') LEVEL
 
+    write(*,*)"Calculating level "//arg//"..."
+
     N_rx = N_r0/2**LEVEL
     N_thetax = N_theta0/2**LEVEL
 
@@ -39,6 +41,8 @@ PROGRAM grav_force_lvlx
         epsilon2 = .000346
     else if (LEVEL==3) then
         epsilon2 = .000902      ! try different values
+    else if (LEVEL==4) then
+        epsilon2 = .001804
     else
         epsilon2 = .000001      ! try different values
     end if
@@ -64,6 +68,7 @@ PROGRAM grav_force_lvlx
                                  & drx, dthetax, rx_squared, rx_prime_squared,&
                                  & rx_ratio, rx_ratio_squared,&
                                  & cos_tablex, sin_tablex)
+    deallocate(r0_squared, r0_prime_squared, rx_squared)
 
 !--------------------------------------------------------------------------------------
 ! PROPAGATION starts here
@@ -77,7 +82,7 @@ PROGRAM grav_force_lvlx
 
 ! write force components for every corner in grid
     do i = 1, N_r0
-        do j = 1, N_theta0!, 2**LEVEL
+        do j = 1, N_theta0
             ! sum up the forces on the point (i, j)
             do iprime = 1, N_rx
                 do jprime = 1, N_thetax
