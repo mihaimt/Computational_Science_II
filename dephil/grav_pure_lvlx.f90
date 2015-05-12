@@ -1,8 +1,8 @@
 !--------------------------------------------------------------------------------------
 ! PROGRAM OSCILLATION_MASS
-!	compile: with make (Makefile included), e.g. make oscillation_mass
+!	compile: with make (Makefile included), e.g. make grav_pure_lvlx
 !       
-!	use:	 ./oscillation_mass [LEVEL], e.g.  ./oscillation_mass 2
+!	use:	 ./grav_pure_lvlx [LEVEL], e.g.  ./grav_pure_lvlx 2
 !--------------------------------------------------------------------------------------
 PROGRAM grav_pure_lvl
     USE grav_parameters

@@ -1,6 +1,14 @@
 #!/bin/bash
 # execute in main folder with ./plot.sh
 
+if [ -x grav_refined ]; then
+    ./grav_refined 1
+    ./grav_refined 2
+    ./grav_refined 3
+    ./grav_refined 4
+    ./grav_refined 5
+fi 
+
 if [ -x grav_pure_lvlx ]; then
     ./grav_pure_lvlx 1
     ./grav_pure_lvlx 2
