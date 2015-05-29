@@ -16,6 +16,7 @@ PROGRAM grav_refined
     INTEGER :: ishift, jshift, ishiftref, jshiftref
     INTEGER :: iref_low, iref_up, ix_low, ix_up
     INTEGER :: jref_low, jref_up, jx_low, jx_up
+    INTEGER :: periodic_low, periodic_up
     INTEGER :: N_rx, N_thetax, N_rxref, N_thetaxref
     INTEGER :: LEVEL, factor_x, half_factor_x
     INTEGER :: LEVELref, factor_xref, half_factor_xref
@@ -34,6 +35,7 @@ PROGRAM grav_refined
     call getarg(1, arg)
     read (arg, '(i5)') LEVEL
 
+    write(*,*)"Setting up grid surface of dimensions ",N_r0,N_theta0
     write(*,*)"Calculating level "//arg//" with refinement..."
 
     factor_x = 2**LEVEL
@@ -95,25 +97,40 @@ PROGRAM grav_refined
 !! LIMIT CONVERSION METHOD
 !! go through the force grid
     do i = 1, N_r0
-        r_corner = r0(i)-.5*dr0(i)                             ! shift to the corner for i
-        ishift = MOD(i-1, factor_x)                            ! shift index for LEVEL X
-        ishiftref = MOD(ishift, factor_xref)                   ! shift index for LEVEL X-1
-        dr_shift = r0(i)-r0(i-ishift)                          ! shift in r for LEVEL X
-        dr_shiftref = r0(i)-r0(i-ishiftref)                    ! shift in r for LEVEL X-1
-        iref_low = (i-factor_x-ishiftref-1)/factor_xref+1      ! lower range limit for refined area in refined coordinates
-        iref_up = (i+factor_x-ishiftref-2)/factor_xref+1       ! upper range limit for refined area in refined coordinates
-        ix_low = (i-factor_x-ishift-1)/factor_x+1              ! lower range limit for refined area in lvlx coordinates
-        ix_up = (i+factor_x-ishift-2)/factor_x+1               ! upper range limit for refined area in lvlx coordinates
+        r_corner = r0(i)-.5*dr0(i)
+        ! index shifts for interpolation in r
+        ishift = MOD(i-1, factor_x)
+        ishiftref = MOD(ishift, factor_xref)
+        ! shifts in r
+        dr_shift = r0(i)-r0(i-ishift)
+        dr_shiftref = r0(i)-r0(i-ishiftref)
+        ! refined area indices in r
+        iref_low = (i-factor_x-ishiftref-1)/factor_xref+1
+        iref_up = (i+factor_x-ishiftref-2)/factor_xref+1
+        ix_low = (i-factor_x-ishift-1)/factor_x+1
+        ix_up = (i+factor_x-ishift-2)/factor_x+1
         do j = 1, N_theta0
-            theta_corner = theta0(j)-.5*dtheta0(j)             ! shift to the corner for j
-            jshift = MOD(j-1, factor_x)                        ! shift index for LEVEL X
-            jshiftref = MOD(jshift, factor_xref)               ! shift index for LEVEL X-1
-            dtheta_shift = theta0(j)-theta0(j-jshift)          ! shift in theta for LEVEL X
-            dtheta_shiftref = theta0(j)-theta0(j-jshiftref)    ! shift in theta for LEVEL X-1
-            jref_low = (j-factor_x-jshiftref-1)/factor_xref+1  ! lower range limit for refined area in refined coordinates
-            jref_up = (j+factor_x-jshiftref-2)/factor_xref+1   ! upper range limit for refined area in refined coordinates
-            jx_low = (j-factor_x-jshift-1)/factor_x+1          ! lower range limit for refined area in lvlx coordinates
-            jx_up = (j+factor_x-jshift-2)/factor_x+1           ! upper range limit for refined area in lvlx coordinates
+            theta_corner = theta0(j)-.5*dtheta0(j)
+            ! index shifts for interpolation in theta
+            jshift = MOD(j-1, factor_x)
+            jshiftref = MOD(jshift, factor_xref)
+            ! shifts in theta
+            dtheta_shift = (theta0(j)-theta0(j-jshift))
+            dtheta_shiftref = theta0(j)-theta0(j-jshiftref)
+            ! refined area indices in theta
+            jref_low = (j-factor_x-jshiftref-1)/factor_xref+1
+            jref_up = (j+factor_x-jshiftref-2)/factor_xref+1
+            jx_low = (j-factor_x-jshift-1)/factor_x+1
+            jx_up = (j+factor_x-jshift-2)/factor_x+1
+            ! index shift for the last two loops if true
+            periodic_low = 0
+            if (jx_low < 1) then
+                periodic_low = 1
+            end if
+            periodic_up = 0
+            if (jx_up > N_thetax) then
+                periodic_up = 1
+            end if
             ! bilinear interpolation coefficients
             c1 = (factor_x-ishift)*(factor_x-jshift)
             c2 = ishift*(factor_x-jshift)
@@ -124,8 +141,8 @@ PROGRAM grav_refined
             c3ref = (factor_xref-ishiftref)*jshiftref
             c4ref = ishiftref*jshiftref
             ! sum up refined area (LEVEL X-1)
-            do iprime = max(iref_low, 0), min(iref_up, N_rxref)
-                do jprime = max(jref_low, 1), min(jref_up, N_thetaxref)
+            do iprime = iref_low, iref_up
+                do jprime = jref_low, jref_up
                     vmass = ( c1ref * massxref(iprime, jprime)    +&
                              &c2ref * massxref(iprime+1, jprime)  +&
                              &c3ref * massxref(iprime, jprime+1)  +&
@@ -144,7 +161,7 @@ PROGRAM grav_refined
                 end do
             end do
             ! sum up the rest as Level X in four parts/loops
-            do iprime = 0, ix_low-1 ! could be trouble
+            do iprime = 0, ix_low-1
                 do jprime = 1, N_thetax
                     vmass = ( c1 * massx(iprime, jprime)    +&
                              &c2 * massx(iprime+1, jprime)  +&
@@ -163,7 +180,7 @@ PROGRAM grav_refined
                     force_theta(i,j) = force_theta(i,j)+force_point*sin(delta_theta)
                 end do
             end do
-            do iprime = ix_up+1, N_rx ! could be trouble
+            do iprime = ix_up+1, N_rx
                 do jprime = 1, N_thetax
                     vmass = ( c1 * massx(iprime, jprime)    +&
                              &c2 * massx(iprime+1, jprime)  +&
@@ -182,8 +199,8 @@ PROGRAM grav_refined
                     force_theta(i,j) = force_theta(i,j)+force_point*sin(delta_theta)
                 end do
             end do
-            do iprime = max(ix_low, 0), min(ix_up, N_rx)
-                do jprime = 1, jx_low-1 ! could be trouble
+            do iprime = ix_low, ix_up
+                do jprime = 1+periodic_up, jx_low-1
                     vmass = ( c1 * massx(iprime, jprime)    +&
                              &c2 * massx(iprime+1, jprime)  +&
                              &c3 * massx(iprime, jprime+1)  +&
@@ -201,8 +218,8 @@ PROGRAM grav_refined
                     force_theta(i,j) = force_theta(i,j)+force_point*sin(delta_theta)
                 end do
             end do
-            do iprime = max(ix_low, 0), min(ix_up, N_rx)
-                do jprime = jx_up+1, N_thetax ! could be trouble
+            do iprime = ix_low, ix_up
+                do jprime = jx_up+1, N_thetax-periodic_low
                     vmass = ( c1 * massx(iprime, jprime)    +&
                              &c2 * massx(iprime+1, jprime)  +&
                              &c3 * massx(iprime, jprime+1)  +&
@@ -223,8 +240,6 @@ PROGRAM grav_refined
         end do
     end do
 
-
-! here the calculation has ended
     call CPU_TIME(finish)
     write(*,*) 'Calculation time =', finish-start, 'seconds'
 

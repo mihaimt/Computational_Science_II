@@ -13,13 +13,14 @@ MODULE grav_mass
             IMPLICIT NONE
             ! DECLARATIONS
             INTEGER, intent(in) :: N_r0, N_theta0
-            REAL(8), DIMENSION(N_r0), intent(in) :: r0, dr0
-            REAL(8), DIMENSION(N_theta0), intent(in) :: dtheta0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: r0, dr0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: dtheta0
             REAL(8), DIMENSION(N_r0, N_theta0), intent(in) :: sigma0
-            REAL(8), DIMENSION(N_r0, N_theta0), intent(out) :: mass0
+            REAL(8), DIMENSION(:,:), ALLOCATABLE, intent(out) :: mass0
             INTEGER :: iprime, jprime
             REAL(8) :: r0dr0_iprime
 
+            allocate(mass0(-1:N_r0+2,-1:N_theta0+2))
             ! fill the <mass table> for LEVEL 0 in the center of the cells
             do iprime = 1, N_r0
                 r0dr0_iprime = r0(iprime)*dr0(iprime) ! multiply dr already here to save some operations
@@ -27,6 +28,15 @@ MODULE grav_mass
                     mass0(iprime,jprime) = -sigma0(iprime,jprime)*r0dr0_iprime*dtheta0(jprime)
                 end do
             end do
+            ! assign boundary conditions / ghost cells
+            mass0(0, :) = 0
+            mass0(-1, :) = 0
+            mass0(:, 0) = mass0(:, N_theta0)      ! periodic
+            mass0(:, -1) = mass0(:, N_theta0-1)   ! periodic
+            mass0(N_r0+1, :) = 0
+            mass0(N_r0+2, :) = 0
+            mass0(:, N_theta0+1) = mass0(:, 1)    ! periodic
+            mass0(:, N_theta0+2) = mass0(:, 2)    ! periodic
         END SUBROUTINE calc_masslvl0
 
 
@@ -35,8 +45,8 @@ MODULE grav_mass
             ! DECLARATIONS
             INTEGER, intent(in) :: N_lvl
             INTEGER, intent(in) :: N_r0, N_theta0
-            REAL(8), DIMENSION(N_r0, N_theta0), intent(in) :: mass0
-            REAL(8), DIMENSION(:, :), ALLOCATABLE, intent(out) :: masslvl
+            REAL(8), DIMENSION(:,:), ALLOCATABLE, intent(in) :: mass0
+            REAL(8), DIMENSION(:,:), ALLOCATABLE, intent(out) :: masslvl
 
             INTEGER :: i, j, permute_i, permute_j     ! iterators
             INTEGER :: factor_lvl                     ! = 2^N_lvl
@@ -47,7 +57,7 @@ MODULE grav_mass
             N_rlvl=N_r0/factor_lvl
             N_thetalvl=N_theta0/factor_lvl
 
-            allocate(masslvl(0:N_rlvl+1, 0:N_thetalvl+1))
+            allocate(masslvl(-1:N_rlvl+2, -1:N_thetalvl+2))
 
             ! fill the <mass table> for LEVEL X
             do i = factor_lvl, N_r0, factor_lvl
@@ -63,9 +73,13 @@ MODULE grav_mass
             end do
             ! assign boundary conditions / ghost cells
             masslvl(0, :) = 0
-            masslvl(:, 0) = masslvl(:, N_thetalvl)
+            masslvl(-1, :) = 0
+            masslvl(:, 0) = masslvl(:, N_thetalvl)      ! periodic
+            masslvl(:, -1) = masslvl(:, N_thetalvl-1)   ! periodic
             masslvl(N_rlvl+1, :) = 0
-            masslvl(:, N_thetalvl+1) = masslvl(:, 1)
+            masslvl(N_rlvl+2, :) = 0
+            masslvl(:, N_thetalvl+1) = masslvl(:, 1)    ! periodic
+            masslvl(:, N_thetalvl+2) = masslvl(:, 2)    ! periodic
         END SUBROUTINE
 
 END MODULE grav_mass

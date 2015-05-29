@@ -1,5 +1,5 @@
 #!/bin/bash
-# execute in main folder with ./plot.sh
+# execute in main folder with ./update.sh
 
 if [ -x grav_refined ]; then
     ./grav_refined 1
@@ -44,4 +44,7 @@ fi
 
 cd bin/
 ./force_plot.py
+./residuals.sh
+./error_plot.py
 cd ../
+

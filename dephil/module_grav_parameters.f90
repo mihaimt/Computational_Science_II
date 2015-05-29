@@ -1,10 +1,10 @@
 MODULE grav_parameters
     ! LEVEL 0 parameters
     INTEGER, PARAMETER :: N_r0=128, N_theta0=256
-    REAL(8), DIMENSION(N_r0) :: r0, dr0
-    REAL(8), DIMENSION(N_theta0) :: theta0, dtheta0
-    REAL(8), DIMENSION(N_r0, N_r0) :: r0_ratio, r0_ratio_squared
-    REAL(8), DIMENSION(N_r0, N_theta0) :: mass0
+    REAL(8), DIMENSION(:), ALLOCATABLE :: r0, dr0
+    REAL(8), DIMENSION(:), ALLOCATABLE :: theta0, dtheta0
+    REAL(8), DIMENSION(0:N_r0+1, 0:N_r0+1) :: r0_ratio, r0_ratio_squared
+    REAL(8), DIMENSION(:, :), ALLOCATABLE :: mass0
     REAL(8), DIMENSION(1-N_theta0:N_theta0-1) :: cos_table0, sin_table0
     REAL(8), DIMENSION(:), ALLOCATABLE :: r0_squared, r0_prime_squared
     REAL(8), DIMENSION(:, :), ALLOCATABLE :: sigma0

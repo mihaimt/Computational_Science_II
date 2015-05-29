@@ -13,8 +13,8 @@ MODULE grav_IO
             IMPLICIT NONE
             ! DECLARATIONS
             INTEGER, intent(in) :: N_r0, N_theta0
-            REAL(8), DIMENSION(N_r0), intent(out) :: r0
-            REAL(8), DIMENSION(N_theta0), intent(out) :: theta0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(out) :: r0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(out) :: theta0
             REAL(8), DIMENSION(:, :), ALLOCATABLE, intent(out) :: sigma0
             ! Local Variables
             INTEGER :: i, j     ! iterators
@@ -25,6 +25,9 @@ MODULE grav_IO
             open(unit=9, file='./data/theta_project.data', status='old', action='read')
             open(unit=10, file='./data/density_project.data', status='old', action='read')
 
+            allocate(r0(-1:N_r0+2))
+            allocate(theta0(-1:N_theta0+2))
+
             ! READ FILES
             ! read <radii> into 1-D array for LEVEL0   - indicates center of the cells
             do i = 1, N_r0
@@ -32,12 +35,24 @@ MODULE grav_IO
                 r0(i) = temp
             end do
             close(unit=8)
+            ! add ghost cells
+            r0(0) = r0(1)-(r0(2)-r0(1))
+            r0(-1) = r0(0)-(r0(1)-r0(0))
+            r0(N_r0+1) = r0(N_r0)+(r0(N_r0)-r0(N_r0-1))
+            r0(N_r0+2) = r0(N_r0+1)+(r0(N_r0+1)-r0(N_r0))
+
             ! read <angles> into 1-D array for LEVEL0   - indicates center of the cells
             do j = 1, N_theta0
                 read(9, '(e20.10)') temp
                 theta0(j) = temp
             end do
             close(unit=9)
+            ! add ghost cells
+            theta0(0) = theta0(N_theta0) !theta0(1)-(theta0(2)-theta0(1))
+            theta0(-1) = theta0(N_theta0-1)
+            theta0(N_theta0+1) = theta0(1) !theta0(N_theta0)+(theta0(N_theta0)-theta0(N_theta0-1))
+            theta0(N_theta0+2) = theta0(2)
+
             ! read <density> into 2-D array for LEVEL0
             allocate(sigma0(N_r0,N_theta0))
             do i = 1, N_r0
@@ -56,9 +71,9 @@ MODULE grav_IO
             ! DECLARATIONS
             INTEGER, intent(in) :: N_lvl
             INTEGER, intent(in) :: N_r0, N_theta0
-            REAL(8), DIMENSION(N_r0), intent(in) :: r0
-            REAL(8), DIMENSION(N_theta0), intent(in) :: theta0
-            REAL(8), DIMENSION(N_r0, N_theta0), intent(in) :: sigma0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: r0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: theta0
+            REAL(8), DIMENSION(:,:), ALLOCATABLE, intent(in) :: sigma0
 
             REAL(8), DIMENSION(:), ALLOCATABLE, intent(out) :: rlvl         ! allocated according to level
             REAL(8), DIMENSION(:), ALLOCATABLE, intent(out) :: thetalvl     ! allocated according to level
@@ -73,8 +88,8 @@ MODULE grav_IO
             N_rlvl=N_r0/factor_lvl
             N_thetalvl=N_theta0/factor_lvl
 
-            allocate(rlvl(0:N_rlvl+1))
-            allocate(thetalvl(0:N_thetalvl+1))
+            allocate(rlvl(-1:N_rlvl+2))
+            allocate(thetalvl(-1:N_thetalvl+2))
             allocate(sigmalvl(N_rlvl, N_thetalvl))
 
             ! READ IN LEVEL N_lvl ------------------
@@ -82,14 +97,22 @@ MODULE grav_IO
             do i = factor_lvl, N_r0, factor_lvl
                 rlvl(i/factor_lvl) = (r0(i)+r0(i-(factor_lvl-1)))*.5
             end do
+            ! add ghost cells
             rlvl(0) = rlvl(1)-(rlvl(2)-rlvl(1))
+            rlvl(-1) = rlvl(0)-(rlvl(1)-rlvl(0))
             rlvl(N_rlvl+1) = rlvl(N_rlvl)+(rlvl(N_rlvl)-rlvl(N_rlvl-1))
+            rlvl(N_rlvl+2) = rlvl(N_rlvl+1)+(rlvl(N_rlvl+1)-rlvl(N_rlvl))
+
             ! read <angles> into 1-D array for LEVEL X   - indicates center of the cells
             do j = factor_lvl, N_theta0, factor_lvl
                 thetalvl(j/factor_lvl) = (theta0(j)+theta0(j-(factor_lvl-1)))*.5
             end do
-            thetalvl(0) = thetalvl(N_thetalvl)
-            thetalvl(N_thetalvl+1) = thetalvl(1)
+            ! add ghost cells
+            thetalvl(0) = thetalvl(N_thetalvl) !thetalvl(1)-(thetalvl(2)-thetalvl(1))
+            thetalvl(-1) = thetalvl(N_thetalvl-1)
+            thetalvl(N_thetalvl+1) = thetalvl(1) !thetalvl(N_thetalvl)+(thetalvl(N_thetalvl)-thetalvl(N_thetalvl-1))
+            thetalvl(N_thetalvl+2) = thetalvl(2)
+
             ! read <density> into 2-D array for LEVEL X
             do i = factor_lvl, N_r0, factor_lvl
                 do j = factor_lvl, N_theta0, factor_lvl

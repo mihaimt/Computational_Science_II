@@ -5,19 +5,24 @@ archive/grav_force_lvl2
 archive/grav_force_lvlx
 archive/oscillation_force
 grav_pure_lvlx
+grav_refined
 bin/force_plot.py
+bin/residual_plot.py
+bin/residuals.sh
+bin/error_plot.py
 update.sh
 
 ### GENERAL INFORMATION
 The program 'oscillation_force' suggests a solution to avoid the oscillations in the 'grav_force_lvlx' program, which calculates the force grid for a given level.
 The 'grav_force' program calculates the LEVEL 0 force grid without using (too) much memory, analogously do programs grav_force_lvl1 and grav_force_lvl2.
 The 'grav_pure_lvlx' program calculates the force on a higher level grid without oscillations.
+The 'grav_refined' program calculates the force on a given level, with a refinement of 16 closest cells of one level lower.
 
 The Makefile included compiles all the programs at once, with 'make all', or individually for make [PROGRAM_NAME]... default is set to the current programs.
 Use/run the programs with ./[PROGRAM] [LEVEL], e.g. ./grav_force_lvlx 3
 
 The program ./bin/force_plot.py plots all the output files in the directory ./data/ and saves them in ./pictures/ .
-The program ./update.sh runs the programs, if they exist, and plots the output.
+The program ./update.sh runs all the programs, if they exist, and plots the output.
 
 ### OSCILLATION_PROGRAMS
 The program 'oscillation_force' calculates the force in the corners of the LEVEL grid and tries to find a direct estimate for the other cells.
@@ -27,6 +32,9 @@ TODO: boundary conditions are unclear and have yet to be corrected.
 The program 'grav_pure_lvlx' calculates the force in all LEVEL 0 points, making a shift of the mass points and grid/points that are not in a corner of the LEVEL grid from the nearest lower left corner.
 This method can still be improved, but is right now by far the slowest program, even slower than the LEVEL 0 calculation with grav_force! 
 TODO: make sure calculations are correct, improve cpu times
+
+### REFINEMENT
+TODO: investigate boundary conditions and check that a loop from N+1 to N is skipped/isn't executed
 
 ### ESTIMATES
 The estimates are done with the neighboring cells to the right, e.g. (i,j) , (i+1,j), (i,j+1), (i+1,j+1).
@@ -39,3 +47,4 @@ NEW CELL(i,j) = [ (2**LEVEL-ishift)*(2**LEVEL-jshift)	* CELL(i,j)
 		] * 1./2**(2*LEVEL)
 
 These factors were used for the force grid and the mass grid with almost the same results...
+

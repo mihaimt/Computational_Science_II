@@ -151,8 +151,6 @@ if __name__ == "__main__":
         force_lvl_r_paths.append(r)
         force_lvl_theta_paths.append(t)
 
-#    diff_path = "../data/rad_m3_to_f3.data"
-
 
 # read and plot data
     r = read_path(r_path)
@@ -174,6 +172,8 @@ if __name__ == "__main__":
     r_files_exist = [os.path.isfile(i) for i in force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]]
     t_files_exist = [os.path.isfile(i) for i in force_lvl_theta_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]]
     if (all(r_files_exist)) and (all(t_files_exist)):
+        print force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]
+        print force_lvl_theta_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]
         for s in force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]:
             force_lvl_r.append(read_path(s))
         for d in range(max_level+1):
@@ -191,6 +191,8 @@ if __name__ == "__main__":
     r_files_exist = [os.path.isfile(i) for i in force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]]
     t_files_exist = [os.path.isfile(i) for i in force_lvl_theta_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]]
     if (all(r_files_exist) and all(t_files_exist)):
+        print force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]
+        print force_lvl_theta_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]
         for s in force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]:
             force_lvl_r.append(read_path(s))
         for d in range(max_level+1):
@@ -208,6 +210,8 @@ if __name__ == "__main__":
     r_files_exist = [os.path.isfile(i) for i in force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]]
     t_files_exist = [os.path.isfile(i) for i in force_lvl_theta_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]]
     if (all(r_files_exist) and all(t_files_exist)):
+        print force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]
+        print force_lvl_theta_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]
         for s in force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]:
             force_lvl_r.append(read_path(s))
         for d in range(max_level+1):
@@ -225,6 +229,8 @@ if __name__ == "__main__":
     r_files_exist = [os.path.isfile(i) for i in force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]]
     t_files_exist = [os.path.isfile(i) for i in force_lvl_theta_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]]
     if (all(r_files_exist) and all(t_files_exist)):
+        print force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]
+        print force_lvl_theta_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]
         for s in force_lvl_r_paths[counter_files*(max_level+1):(counter_files*(max_level+1)+(max_level+1))]:
             force_lvl_r.append(read_path(s))
         for d in range(1, max_level+2):
@@ -239,5 +245,4 @@ if __name__ == "__main__":
         print "grav_refined output plotted"
     counter_files = counter_files + 1
 
-#    diff = read_path(diff_path)
-#    plot_force_radial(diff, r, theta, '../pictures/diff_m3_to_f3.png')
+    

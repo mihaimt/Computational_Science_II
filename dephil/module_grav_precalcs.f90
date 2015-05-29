@@ -15,11 +15,11 @@ MODULE grav_precalcs
             IMPLICIT NONE
             ! DECLARATIONS
             INTEGER, intent(in) :: N_r0, N_theta0
-            REAL(8), DIMENSION(N_r0), intent(in) :: r0
-            REAL(8), DIMENSION(N_theta0), intent(in) :: theta0
-            REAL(8), DIMENSION(N_r0), intent(out) :: dr0
-            REAL(8), DIMENSION(N_r0, N_r0), intent(out) :: r0_ratio, r0_ratio_squared
-            REAL(8), DIMENSION(N_theta0), intent(out) :: dtheta0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: r0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: theta0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(out) :: dr0
+            REAL(8), DIMENSION(0:N_r0+1, 0:N_r0+1), intent(out) :: r0_ratio, r0_ratio_squared
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(out) :: dtheta0
             REAL(8), DIMENSION(1-N_theta0:N_theta0-1), intent(out) :: cos_table0, sin_table0
             REAL(8), DIMENSION(:), ALLOCATABLE, intent(out) :: r0_squared, r0_prime_squared
             ! Local variables
@@ -27,14 +27,28 @@ MODULE grav_precalcs
             REAL(8) :: r0_i, r0_iprime, theta0_j, diff_theta
 
             ! different <dr/dtheta> for LEVEL 0   - distances from centers of cells == cell widths
+            allocate(dr0(-1:N_r0+2))
             do i = 1, N_r0-1
                 dr0(i) = r0(i+1)-r0(i)
             end do
             dr0(N_r0) = dr0(N_r0-1)
+            ! add ghost cells
+            dr0(0) = dr0(1)
+            dr0(-1) = dr0(0)
+            dr0(N_r0+1) = dr0(N_r0)
+            dr0(N_r0+2) = dr0(N_r0+1)
+            
+            allocate(dtheta0(-1:N_theta0+2))
             do j = 1, N_theta0-1
                 dtheta0(j) = theta0(j+1)-theta0(j)
             end do
             dtheta0(N_theta0) = dtheta0(N_theta0-1)
+            ! add ghost cells
+            dtheta0(0) = dtheta0(N_theta0)
+            dtheta0(-1) = dtheta0(N_theta0-1)
+            dtheta0(N_theta0+1) = dtheta0(1)
+            dtheta0(N_theta0+2) = dtheta0(2)
+
             ! <r²> in the corners and <r'²> in the centres for LEVEL0   - r² indicates corners and r'² indicates centers of the cells
             allocate(r0_squared(N_r0), r0_prime_squared(N_r0))
             do i = 1, N_r0
@@ -42,6 +56,7 @@ MODULE grav_precalcs
                 r0_squared(i) = r0_i*r0_i
                 r0_prime_squared(i) = r0(i)*r0(i)
             end do
+
             ! <r ratios> and <r ratios squared> for LEVEL0   - ratios of r to r' from corners to centers of the cells
             do i = 1, N_r0
                 r0_i = r0(i)-.5*dr0(i) ! shift r to the corners
@@ -51,6 +66,7 @@ MODULE grav_precalcs
                     r0_ratio_squared(i, iprime) = r0_iprime*r0_iprime
                 end do
             end do
+
             ! the <sin/cos> tables for LEVEL 0   - of differences of thetas from corner to centers of the cells
             do j = 1, N_theta0
                 theta0_j = theta0(j)-.5*dtheta0(j)
@@ -72,8 +88,8 @@ MODULE grav_precalcs
             ! DECLARATIONS
             INTEGER, intent(in) :: N_lvl
             INTEGER, intent(in) :: N_r0, N_theta0
-            REAL(8), DIMENSION(N_r0), intent(in) :: r0, dr0
-            REAL(8), DIMENSION(N_theta0), intent(in) :: theta0, dtheta0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: r0, dr0
+            REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: theta0, dtheta0
             REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: rlvl         ! at this point already allocated
             REAL(8), DIMENSION(:), ALLOCATABLE, intent(in) :: thetalvl     ! at this point already allocated
 
@@ -91,8 +107,8 @@ MODULE grav_precalcs
             N_rlvl=N_r0/factor_lvl
             N_thetalvl=N_theta0/factor_lvl
 
-            allocate(drlvl(0:N_rlvl+1), rlvl_squared(0:N_rlvl+1), rlvl_prime_squared(0:N_rlvl+1))
-            allocate(dthetalvl(0:N_thetalvl+1))
+            allocate(drlvl(-1:N_rlvl+2), rlvl_squared(0:N_rlvl+1), rlvl_prime_squared(0:N_rlvl+1))
+            allocate(dthetalvl(-1:N_thetalvl+2))
             allocate(rlvl_ratio(N_r0, 0:N_rlvl+1), rlvl_ratio_squared(N_r0, 0:N_rlvl+1))
             allocate(cos_tablelvl(N_theta0, 0:N_thetalvl+1), sin_tablelvl(N_theta0, 0:N_thetalvl+1))
 
@@ -100,18 +116,28 @@ MODULE grav_precalcs
             do i = 0, N_rlvl
                 drlvl(i) = rlvl(i+1)-rlvl(i)
             end do
+            ! add ghost cells
+            drlvl(-1) = drlvl(0)
             drlvl(N_rlvl+1) = drlvl(N_rlvl)
-            do j = 0, N_thetalvl!-1 ???
+            drlvl(N_rlvl+2) = drlvl(N_rlvl+1)
+
+            do j = 1, N_thetalvl-1
                 dthetalvl(j) = thetalvl(j+1)-thetalvl(j)
             end do
-            !dthetalvl(N_thetalvl) = dthetalvl(N_thetalvl-1)
+            dthetalvl(N_thetalvl) = dthetalvl(N_thetalvl-1)
+            ! add ghost cells
+            dthetalvl(0) = dthetalvl(N_thetalvl)
+            dthetalvl(-1) = dthetalvl(N_thetalvl-1)
             dthetalvl(N_thetalvl+1) = dthetalvl(1)
+            dthetalvl(N_thetalvl+2) = dthetalvl(2)
+
             ! <r²> in the corners and <r'²> in the centres for LEVEL X   - r² indicates corners and r'² indicates centers of the cells
             do i = 0, N_rlvl+1
                 rlvl_i = rlvl(i)-.5*drlvl(i) ! shift r to the corners
                 rlvl_squared(i) = rlvl_i*rlvl_i
                 rlvl_prime_squared(i) = rlvl(i)*rlvl(i)
             end do
+
             ! <r ratios> and <r ratios squared> for LEVEL X   - ratios of r to r' from corners to centers of the cells
             do i = 1, N_r0
                 r0_i = r0(i)-.5*dr0(i) ! shift r to the corners
@@ -121,6 +147,7 @@ MODULE grav_precalcs
                     rlvl_ratio_squared(i, iprime) = rlvl_iprime*rlvl_iprime
                 end do
             end do
+
             ! fill the <sin/cos table> for LEVEL X   - of differences of thetas from corner to centers of the cells
             do j = 1, N_theta0
                 theta0_j = theta0(j)-.5*dtheta0(j)
