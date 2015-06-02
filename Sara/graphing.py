@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import numpy as np
 
+import os
+
 #custom colour map, default looks funny
 cmap_bgr = colors.LinearSegmentedColormap.from_list("bgr", [
     (0.0, "darkred"),
@@ -14,12 +16,45 @@ cmap_bgr = colors.LinearSegmentedColormap.from_list("bgr", [
     (1.0, "darkblue"),
 ])
 
+def plot2(a,b):
+	plt.subplot(1,2,1)
+	plotFile(a)
+	plt.subplot(1,2,2)
+	plotFile(b)
 
-def plotFile( filename ): 
+def plotDiff2(a1, a2, b1, b2):
+	plt.subplot(1,2,1)
+	plotDiff(a1, a2)
+	plt.subplot(1,2,2)
+	plotDiff(b1, b2)
+
+def plot4(a,b,c,d):
+	plt.subplot(2,2,1)
+	plotFile(a)
+	plt.subplot(2,2,2)
+	plotFile(b)
+	plt.subplot(2,2,3)
+	plotFile(c)
+	plt.subplot(2,2,4)
+	plotFile(d)
+
+def plotFile(filename): 
     f = open(filename, 'r')
     values = [float(line) for line in f]
     f.close()
+    plotArray(values, os.path.basename(filename))
 
+def plotDiff(file_a, file_b):
+    f = open(file_a, 'r')
+    values_a = [float(line) for line in f]
+    f.close()
+    f = open(file_b, 'r')
+    values_b = [float(line) for line in f]
+    f.close()
+    diff = [b_i - a_i for a_i, b_i in zip(values_a, values_b)]
+    plotArray(diff, 'diff_' + os.path.basename(file_a))
+
+def plotArray(values, name):
     x, y = np.mgrid[ slice(min(radii),max(radii)+dr,dr), 
               slice(min(angles), max(angles)+dtheta, dtheta) ]
 
@@ -28,8 +63,9 @@ def plotFile( filename ):
 
     npvalues = np.array(values).reshape(len(radii),len(angles))
 
-    plt.pcolor(x, y, npvalues, cmap=cmap_bgr, vmin=value_min, vmax=value_max)
-    plt.title(filename)
+    #plt.pcolor(x, y, npvalues, cmap=cmap_bgr, vmin=value_min, vmax=value_max)
+    plt.pcolor(x, y, npvalues, cmap=plt.get_cmap('jet'), vmin=value_min, vmax=value_max)
+    plt.title(name + '\n[' + str(value_min) + ', ' + str(value_max) + ']')
     plt.xlabel("Radius [r_0]")
     plt.ylabel("Azimuth [theta]")
     plt.axis([x.min(), x.max(), y.min(), y.max()]);
@@ -44,13 +80,31 @@ angles = [float(line) for line in f]
 f.close()
 dtheta = angles[1]-angles[0]
 
-plt.subplot(2,2,1)
-plotFile ('density_project.data')
-plt.subplot(2,2,2)
-plotFile ('force_mag.data')
-plt.subplot(2,2,3)
-plotFile ('force_r.data')
-plt.subplot(2,2,4)
-plotFile ('force_theta.data')
+# Show all local
+#plot4('density_project.data', 'force_mag.data', 'force_r.data', 'force_theta.data')
+
+# Show local
+#plot2('force_r.data', 'force_theta.data')
+
+path = '../dephil/data/'
+suffix = '_pure_lvl0.data'
+suffix2 = '_pure_lvl1.data'
+# Show suffix
+#plot2(path + 'radial' + suffix, path + 'angular' + suffix)
+
+# Diff local vs local base
+plotDiff2('force_r.data', 'data/force_r.data', 'force_theta.data', 'data/force_theta.data')
+
+# Diff local vs dephil base
+#plotDiff2('data/force_r.data', path + 'f_radial.data', 'data/force_theta.data', path + 'f_angular.data')
+
+# Diff local vs. suffix
+#plotDiff2('force_r.data', path + 'radial' + suffix, 'force_theta.data', path + 'angular' + suffix)
+
+# Diff local vs dephil default
+#plotDiff2('force_r.data', path + 'f_radial.data', 'force_theta.data', path + 'f_angular.data')
+
+# Diff suffix vs suffix2
+#plotDiff2(path + 'radial' + suffix, path + 'radial' + suffix2, path + 'angular' + suffix, path + 'angular' + suffix2)
 
 plt.show()
