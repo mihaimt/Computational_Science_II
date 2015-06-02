@@ -10,9 +10,10 @@ program gravity
   integer, parameter :: N_r = 128
   integer, parameter :: N_theta = 256
   real(8), parameter :: epsilonCos = 1d-8 ! not used
-  integer, parameter :: level = 6
-  integer, parameter :: level_mult = 2 ** level
-  real(8), parameter :: eps = 1e-6
+  integer, parameter :: min_level = 0
+  integer, parameter :: max_level = 5
+  integer, parameter :: level_mult = 2 ** max_level
+  real(8), parameter :: eps = 0
   ! run-time variables
   real(8) :: a,r,r2, theta, r_step, t_step, r_p, theta_p, force_mag_temp, surface_area, d_rd_theta, force_denominator
 
@@ -70,8 +71,8 @@ program gravity
     mass(out_i) = -sigma(out_i)*r*d_rd_theta
   end do
 
-  call computeMassAtHigherLevels(N_r, N_theta, level)
-  call writeMasses(level)
+  call computeMassAtHigherLevels(N_r, N_theta, max_level)
+  !call writeMasses(max_level)
 
   ! out_i: index to output grid
   do out_i=0, (N_r*N_theta)-1          
@@ -82,8 +83,8 @@ program gravity
     force_r(out_i)=0
     force_theta(out_i)=0
     do in_i=0, inner_loop_size
-      force = computeForcesAtLevel(level, level_mult, r, theta, in_i)
-      force_r(out_i) = force_r(out_i) + REALPART(force)
+      force = computeForcesAtLevel(max_level, level_mult, r, theta, in_i)
+      force_r(out_i) = force_r(out_i) - REALPART(force)
       force_theta(out_i) = force_theta(out_i) + IMAGPART(force)
     end do
     force_mag(out_i) = sqrt(force_r(out_i)*force_r(out_i) + force_theta(out_i)*force_theta(out_i)) 
@@ -110,8 +111,14 @@ contains
       offsets(i) = offsets(i-1) + s
       s = s/4
     end do
-    print *, "offsets: ", offsets
   end subroutine computeLevelOffsets
+
+  ! TODO: remove, just here for debugging.
+  subroutine cosCacheTest(in_i, out_i, level, N_theta, theta_p, theta, cosvar)
+    integer :: in_i, out_i, level, N_theta
+    real(8) :: theta_p, theta, cosvar
+    print *, in_i, out_i, level, N_theta, cosvar
+  end subroutine cosCacheTest
 
 
   ! using the COMPLEX type as a container for the f_r and f_t return value
@@ -131,7 +138,9 @@ contains
            r_prime((r_lookup+1) * level_mult - 1)) * 0.5
     theta_p = (theta_prime(MODULO(in_i*level_mult, N_theta)) + &
                theta_prime(MODULO((in_i+1)*level_mult - 1, N_theta))) * 0.5
-    IF (level > 0 .AND. (abs(r-r_p) < level_cutoff * r_step .OR. abs(theta-theta_p) < level_cutoff * t_step)) THEN
+    IF (level > min_level .AND. &
+        (abs(r-r_p) < level_cutoff * r_step .OR. &
+         abs(theta-theta_p) < level_cutoff * t_step)) THEN
       in_r = in_i / (N_theta / level_mult)
       in_t = MODULO(in_i, N_theta / level_mult)
       in_j = (in_r * 2) * (2*N_theta / level_mult) + in_t * 2
@@ -147,10 +156,12 @@ contains
       cosvar = cos(theta_p - theta)
       sinvar = sin(theta_p - theta)
 
+      ! try to figure out coscache again.
+      !call cosCacheTest(in_i, out_i, level, N_theta, theta_p, theta, cosvar)
+
       force_denominator = (r*r+r_p*r_p-(2*r*r_p*cosvar))
       force_denominator = sqrt(force_denominator)*force_denominator + eps
 
-      ! TODO: fix mass lookup
       f_mag = mass(level_offset_lookup(level) + in_i)/force_denominator
       f_r = (r - r_p*cosvar) * f_mag
       f_t = (r_p*sinvar) * f_mag
@@ -158,6 +169,9 @@ contains
     END IF
   end function computeForcesAtLevel
 
+  ! All masses are in the same array, the first level is at index [0, N_r * N_theta),
+  ! the second level is at [N_r * N_theta, (N_r * N_theta) + (N_r/2) * (N_theta/2) ),
+  ! and so forth. Every higher level is only 1/4th of the size of the previous one.
   subroutine computeMassAtHigherLevels(N_r, N_theta, level)
     !real(8) :: mass(:)                          ! In place replacement of array. Replace Level L with L+level
     integer :: N_r, N_theta, level              ! N_r and N_theta are sizes of input data
@@ -173,7 +187,6 @@ contains
     do i = 1, level
       out_N_r = in_N_r/2
       out_N_t = in_N_t/2
-      print *, "mass at level", i, offset_out, offset_in, out_N_r, out_N_t
         
       do r = 0, out_N_r-1
         do t = 0, out_N_t-1
