@@ -57,7 +57,7 @@ program gravity
   ! Compute the mass at level_0
   do out_i=0, (N_r*N_theta)-1
     r = r_prime(out_i/N_theta)
-    mass(out_i) = sigma(out_i)*r*d_rd_theta
+    mass(out_i) = -sigma(out_i)*r*d_rd_theta
   end do
 
   call increaseLevel(mass, N_r, N_theta, level)
@@ -79,8 +79,8 @@ program gravity
       theta_p = (theta_prime(MODULO(in_i*level_mult, N_theta)) + &
                  theta_prime(MODULO((in_i+1)*level_mult - 1, N_theta))) * 0.5
       
-      cosvar = cosCache(MODULO(in_i*level_mult-out_i, N_theta))  
-      sinvar = sinCache(MODULO(in_i*level_mult-out_i, N_theta))
+      cosvar = cosCache(MODULO(out_i-in_i*level_mult, N_theta))  
+      sinvar = sinCache(MODULO(out_i-in_i*level_mult, N_theta))
 
       force_denominator = (r2+r_p*r_p-(2*r*r_p*cosvar))
       force_denominator = sqrt(force_denominator)*force_denominator + eps
