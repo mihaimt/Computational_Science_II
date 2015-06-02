@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import numpy as np
+import math
 
 #custom colour map, default looks funny
 cmap_bgr = colors.LinearSegmentedColormap.from_list("bgr", [
@@ -15,7 +16,8 @@ cmap_bgr = colors.LinearSegmentedColormap.from_list("bgr", [
 ])
 
 
-def plotFile( filename ): 
+def plotFile(filename): 
+    print "plotFile", filename
     f = open(filename, 'r')
     values = [float(line) for line in f]
     f.close()
@@ -32,6 +34,24 @@ def plotFile( filename ):
     plt.title(filename)
     plt.xlabel("Radius [r_0]")
     plt.ylabel("Azimuth [theta]")
+    plt.axis([x.min(), x.max(), y.min(), y.max()]);
+    print "plot done."
+
+def plotMass(level):
+    f = open('mass_%.2d.txt' % level, 'r')
+    masses = [float(line) for line in f]
+    f.close()
+    size = int(math.sqrt(len(masses)/2))
+    x, y = np.mgrid[slice(0, size, 1), slice(0, size*2, 1)]
+    value_min = min(masses)
+    value_max = max(masses)
+    print "plotMass", len(masses), size, value_min, value_max
+
+    npvalues = np.array(masses).reshape(size, size*2)
+    plt.pcolor(x, y, npvalues, cmap=cmap_bgr, vmin=value_min, vmax=value_max)
+    plt.title('Mass Level %d' % level)
+    plt.xlabel("x")
+    plt.ylabel("y")
     plt.axis([x.min(), x.max(), y.min(), y.max()]);
 
 f = open('r_project.data', 'r')
@@ -52,5 +72,14 @@ plt.subplot(2,2,3)
 plotFile ('force_r.data')
 plt.subplot(2,2,4)
 plotFile ('force_theta.data')
-
 plt.show()
+
+#plt.savefig("forces.png")
+#print "saved forces.png"
+
+#for i in range(0,4):
+#    plt.subplot(2,2,i+1)
+#    plotMass(i)
+#plt.show()
+#plt.savefig("masses.png")
+#print "saved masses.png"

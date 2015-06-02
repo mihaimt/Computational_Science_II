@@ -1,8 +1,7 @@
 program gravity
+
   !  optimised with -O2
   !  2 trials
-!      Time:      3.6949229999999997      s
-!      Time:      3.6917869999999997      s
           
   implicit none             ! all variables must be defined
   real(8) t_init, t_end     ! global timing
@@ -10,7 +9,7 @@ program gravity
   real, parameter :: pi = 3.1415926538
   integer, parameter :: N_r = 128
   integer, parameter :: N_theta = 256
-  real(8), parameter :: epsilonCos = 1d-8
+  real(8), parameter :: epsilonCos = 1d-8 ! not used
   integer, parameter :: level = 6
   integer, parameter :: level_mult = 2 ** level
   real(8), parameter :: eps = 1e-6
@@ -39,7 +38,7 @@ program gravity
   COMPLEX(8) :: force
 
   ! lookup array
-  integer,dimension(0:20) :: level_offset_lookup  ! conseravtively oversized
+  integer,dimension(0:20) :: level_offset_lookup  ! conservatively oversized
 
 
 
@@ -51,7 +50,7 @@ program gravity
   write (*,*) 'Data read done.'
 
   ! grid is regular, all step sizes are equal
-  r_step = r_prime(1) - r_prime(0)                
+  r_step = r_prime(1) - r_prime(0)
   t_step = theta_prime(1) - theta_prime(0)  
   d_rd_theta = r_step * t_step ! precalculate dtheta*dr
    
@@ -68,7 +67,7 @@ program gravity
   ! Compute the mass at level_0
   do out_i=0, (N_r*N_theta)-1
     r = r_prime(out_i/N_theta)
-    mass(out_i) = sigma(out_i)*r*d_rd_theta
+    mass(out_i) = -sigma(out_i)*r*d_rd_theta
   end do
 
   call computeMassAtHigherLevels(N_r, N_theta, level)
@@ -79,7 +78,7 @@ program gravity
                                                                     !avoid singularities
     r=r_prime(out_i/N_theta)-(r_step/2.0)                           !r_prime - half_step
     theta = theta_prime(MODULO(out_i, N_theta))-(t_step/2.0)    !same as above, for theta
-    r2=r*r                                                          !putting into memory causes slowdown
+    !r2=r*r                                                          !putting into memory causes slowdown
     force_r(out_i)=0
     force_theta(out_i)=0
     do in_i=0, inner_loop_size
@@ -125,11 +124,11 @@ contains
     real(8) :: level_cutoff
     integer :: r_lookup, in_r, in_t, in_j
     real(8) :: f_mag, f_r, f_t
-    !
-    level_cutoff = level_mult * 2.0
+    ! Arbitrarily chosen value... try trial and error to find best rate of trade-off.. low error, good speed. try: [.5, 3] ?
+    level_cutoff = level_mult * 2.0  !grid cell distance that allows this level to be used
     r_lookup = in_i / (N_theta/level_mult)
     r_p = (r_prime(r_lookup * level_mult) + &
-             r_prime((r_lookup+1) * level_mult - 1)) * 0.5
+           r_prime((r_lookup+1) * level_mult - 1)) * 0.5
     theta_p = (theta_prime(MODULO(in_i*level_mult, N_theta)) + &
                theta_prime(MODULO((in_i+1)*level_mult - 1, N_theta))) * 0.5
     IF (level > 0 .AND. (abs(r-r_p) < level_cutoff * r_step .OR. abs(theta-theta_p) < level_cutoff * t_step)) THEN
