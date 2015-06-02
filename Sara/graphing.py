@@ -72,7 +72,6 @@ def plotArray(values, name):
     plt.xlabel("Radius [r_0]")
     plt.ylabel("Azimuth [theta]")
     plt.axis([x.min(), x.max(), y.min(), y.max()]);
-    print "plot done."
 
 def plotMass(level):
     f = open('mass_%.2d.txt' % level, 'r')

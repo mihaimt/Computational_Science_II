@@ -9,9 +9,8 @@ program gravity
   real, parameter :: pi = 3.1415926538
   integer, parameter :: N_r = 128
   integer, parameter :: N_theta = 256
-  real(8), parameter :: epsilonCos = 1d-8 ! not used
   integer, parameter :: min_level = 0
-  integer, parameter :: max_level = 5
+  integer, parameter :: max_level = 2
   integer, parameter :: level_mult = 2 ** max_level
   real(8), parameter :: eps = 0
   ! run-time variables
@@ -28,8 +27,6 @@ program gravity
   ! iterator variables
   integer :: out_i, in_i, theta_i
 
-  !cache and lookup variables
-  real(8) :: cosvar, sinvar, cosCache(0:N_theta-1), sinCache(0:N_theta-1)
  
   !size of the inner loop, assume start at 0
   integer, parameter :: inner_loop_size = ((N_r / level_mult) * (N_theta / level_mult)) - 1
@@ -41,26 +38,16 @@ program gravity
   ! lookup array
   integer,dimension(0:20) :: level_offset_lookup  ! conservatively oversized
 
-
-
-  write (*,*) 'Program Start ', ' ... '
-  write (*,*) 'Data read ...'
   call readFile("r_project.data", r_prime)
   call readFile("theta_project.data", theta_prime)
   call readFile("density_project.data", sigma)
-  write (*,*) 'Data read done.'
+  print *, "Simulation start..."
 
   ! grid is regular, all step sizes are equal
   r_step = r_prime(1) - r_prime(0)
   t_step = theta_prime(1) - theta_prime(0)  
   d_rd_theta = r_step * t_step ! precalculate dtheta*dr
    
-  ! pre-compute the cache for all theta differences that occur, for N_theta/4 values of N_theta
-  do theta_i=0, (N_theta)-1
-    cosCache(theta_i) = cos((theta_i+ (0.5 * level_mult))*t_step)
-    sinCache(theta_i) = sin((theta_i+ (0.5 * level_mult))*t_step)
-  end do
-
   call computeLevelOffsets(level_offset_lookup)
  
   call CPU_TIME(t_init)
@@ -75,19 +62,19 @@ program gravity
   !call writeMasses(max_level)
 
   ! out_i: index to output grid
-  do out_i=0, (N_r*N_theta)-1          
-                                                                    !avoid singularities
-    r=r_prime(out_i/N_theta)-(r_step/2.0)                           !r_prime - half_step
-    theta = theta_prime(MODULO(out_i, N_theta))-(t_step/2.0)    !same as above, for theta
-    !r2=r*r                                                          !putting into memory causes slowdown
+  do out_i=0, (N_r*N_theta)-1
+    ! The output grid is half a theta and r step shifted.
+    r=r_prime(out_i/N_theta)-(r_step/2.0)
+    theta = theta_prime(MODULO(out_i, N_theta))-(t_step/2.0)
     force_r(out_i)=0
     force_theta(out_i)=0
     do in_i=0, inner_loop_size
       force = computeForcesAtLevel(max_level, level_mult, r, theta, in_i)
-      force_r(out_i) = force_r(out_i) - REALPART(force)
+      force_r(out_i) = force_r(out_i) + REALPART(force)
       force_theta(out_i) = force_theta(out_i) + IMAGPART(force)
     end do
-    force_mag(out_i) = sqrt(force_r(out_i)*force_r(out_i) + force_theta(out_i)*force_theta(out_i)) 
+    force_mag(out_i) = sqrt(force_r(out_i)*force_r(out_i) + &
+                            force_theta(out_i)*force_theta(out_i)) 
   end do
 
   call CPU_TIME(t_end)
@@ -113,15 +100,12 @@ contains
     end do
   end subroutine computeLevelOffsets
 
-  ! TODO: remove, just here for debugging.
-  subroutine cosCacheTest(in_i, out_i, level, N_theta, theta_p, theta, cosvar)
-    integer :: in_i, out_i, level, N_theta
-    real(8) :: theta_p, theta, cosvar
-    print *, in_i, out_i, level, N_theta, cosvar
-  end subroutine cosCacheTest
-
-
-  ! using the COMPLEX type as a container for the f_r and f_t return value
+  ! This method computes the force between a given (r,theta) and the mass at (in_i,
+  ! which defines r' and theta') at a given level. If this level is too big/close to
+  ! the current (r,theta) then the function recurses one level lower until the
+  ! the distance constraint is no longer violated or the lowest level has been
+  ! reached.
+  ! HACK: Using the COMPLEX type as a container for the f_r and f_t return value
   recursive function computeForcesAtLevel(level, level_mult, r, theta, in_i) result(force)
     implicit none
     ! input variables
@@ -131,8 +115,11 @@ contains
     real(8) :: level_cutoff
     integer :: r_lookup, in_r, in_t, in_j
     real(8) :: f_mag, f_r, f_t
-    ! Arbitrarily chosen value... try trial and error to find best rate of trade-off.. low error, good speed. try: [.5, 3] ?
-    level_cutoff = level_mult * 2.0  !grid cell distance that allows this level to be used
+    real(8) :: cosvar, sinvar
+    ! Grid cell distance that allows this level to be used
+    !  Arbitrarily chosen value, try trial and error to find best rate of trade-off:
+    !  low error, good speed. try: [.5, 3] ?
+    level_cutoff = level_mult * 2.0
     r_lookup = in_i / (N_theta/level_mult)
     r_p = (r_prime(r_lookup * level_mult) + &
            r_prime((r_lookup+1) * level_mult - 1)) * 0.5
@@ -151,13 +138,8 @@ contains
       force = force + computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j + 1)
     ELSE
       ! TODO: Implement the cos cache again, using cos/sin is super slow.
-      !cosvar = cosCache(MODULO(in_i*level_mult-out_i, N_theta))  
-      !sinvar = sinCache(MODULO(in_i*level_mult-out_i, N_theta))
-      cosvar = cos(theta_p - theta)
-      sinvar = sin(theta_p - theta)
-
-      ! try to figure out coscache again.
-      !call cosCacheTest(in_i, out_i, level, N_theta, theta_p, theta, cosvar)
+      cosvar = cos(theta - theta_p)
+      sinvar = sin(theta - theta_p)
 
       force_denominator = (r*r+r_p*r_p-(2*r*r_p*cosvar))
       force_denominator = sqrt(force_denominator)*force_denominator + eps
