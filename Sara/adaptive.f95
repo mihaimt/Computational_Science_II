@@ -10,14 +10,14 @@ program gravity
   integer, parameter :: N_r = 128
   integer, parameter :: N_theta = 256
   integer, parameter :: min_level = 0
-  integer, parameter :: max_level = 2
+  integer, parameter :: max_level = 6
   integer, parameter :: level_mult = 2 ** max_level
   real(8), parameter :: eps = 0
   ! run-time variables
   real(8) :: a,r,r2, theta, r_step, t_step, r_p, theta_p, force_mag_temp, surface_area, d_rd_theta, force_denominator
 
   ! use zero-based indexing for arrays to make modulo math work better below.
-  real(8),dimension(0:(N_r*N_theta)-1) :: force_r, force_theta, force_mag, sigma
+  real(8),dimension(0:(N_r*N_theta)-1) :: force_r, force_theta, force_mag, sigma, debug_value
   ! Store masses of all levels in the same array with concat. Ex: [level0]+[level1]+[level2]+...
   ! limit of geometric series is the size of array: 4/3 of original size 
   real(8),dimension(0:(N_r*N_theta) * 4 / 3) :: mass
@@ -69,7 +69,7 @@ program gravity
     force_r(out_i)=0
     force_theta(out_i)=0
     do in_i=0, inner_loop_size
-      force = computeForcesAtLevel(max_level, level_mult, r, theta, in_i)
+      force = computeForcesAtLevel(max_level, level_mult, r, theta, in_i, out_i == 12401)
       force_r(out_i) = force_r(out_i) + REALPART(force)
       force_theta(out_i) = force_theta(out_i) + IMAGPART(force)
     end do
@@ -82,9 +82,9 @@ program gravity
   call writeFile("force_r.data",force_r)
   call writeFile("force_theta.data",force_theta)
   call writeFile("force_mag.data", force_mag)
+  !call writeFile("debug_level.data", debug_value)
 
   print *, "Time: ", t_end - t_init , "s"
-
 
 contains 
 
@@ -100,42 +100,68 @@ contains
     end do
   end subroutine computeLevelOffsets
 
+  ! Used to see which level contributes to a specific pixel.
+  recursive subroutine showDebug(in_i, in_level, read_level)
+    integer, intent(in) :: in_i, in_level, read_level
+    integer :: level_mult, in_r, in_t, in_j
+    level_mult = 2 ** in_level
+    if (in_level > 0) then
+      ! This uses the same recursion logic as computeForcesAtLevel to propagate the read level
+      ! down to every individual grid cell (=pixel)
+      in_r = in_i / (N_theta / level_mult)
+      in_t = MODULO(in_i, N_theta / level_mult)
+      in_j = (in_r * 2) * (2*N_theta / level_mult) + in_t * 2
+      call showDebug(in_j, in_level-1, read_level)
+      call showDebug(in_j + 1, in_level-1, read_level)
+      in_j = (in_r * 2 + 1) * (2*N_theta / level_mult) + in_t * 2
+      call showDebug(in_j, in_level-1, read_level)
+      call showDebug(in_j + 1, in_level-1, read_level)
+    else
+      debug_value(in_i) = dble(read_level)
+    end if
+  end subroutine showDebug
+
   ! This method computes the force between a given (r,theta) and the mass at (in_i,
   ! which defines r' and theta') at a given level. If this level is too big/close to
   ! the current (r,theta) then the function recurses one level lower until the
   ! the distance constraint is no longer violated or the lowest level has been
   ! reached.
   ! HACK: Using the COMPLEX type as a container for the f_r and f_t return value
-  recursive function computeForcesAtLevel(level, level_mult, r, theta, in_i) result(force)
+  recursive function computeForcesAtLevel(level, level_mult, r, theta, in_i, debug_this) result(force)
     implicit none
     ! input variables
     integer, intent(in) :: level, level_mult, in_i
     real(8), intent(in) :: r, theta
     complex(8) :: force
-    real(8) :: level_cutoff
+    real(8) :: level_cutoff, theta_diff
     integer :: r_lookup, in_r, in_t, in_j
     real(8) :: f_mag, f_r, f_t
     real(8) :: cosvar, sinvar
+    logical :: debug_this ! Used to display what levels are used for this specific point.
     ! Grid cell distance that allows this level to be used
     !  Arbitrarily chosen value, try trial and error to find best rate of trade-off:
     !  low error, good speed. try: [.5, 3] ?
-    level_cutoff = level_mult * 2.0
+    level_cutoff = level_mult * 3.0
     r_lookup = in_i / (N_theta/level_mult)
     r_p = (r_prime(r_lookup * level_mult) + &
            r_prime((r_lookup+1) * level_mult - 1)) * 0.5
     theta_p = (theta_prime(MODULO(in_i*level_mult, N_theta)) + &
                theta_prime(MODULO((in_i+1)*level_mult - 1, N_theta))) * 0.5
+
+    ! properly handle the cyclical nature of the theta dimension.
+    theta_diff = abs(theta - theta_p)
+    theta_diff = min(theta_diff, abs(theta_diff - (2 * pi)))
     IF (level > min_level .AND. &
-        (abs(r-r_p) < level_cutoff * r_step .OR. &
-         abs(theta-theta_p) < level_cutoff * t_step)) THEN
+        (abs(r-r_p) < level_cutoff * r_step .AND. &
+         theta_diff < level_cutoff * t_step)) THEN
       in_r = in_i / (N_theta / level_mult)
       in_t = MODULO(in_i, N_theta / level_mult)
       in_j = (in_r * 2) * (2*N_theta / level_mult) + in_t * 2
-      force =         computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j)
-      force = force + computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j + 1)
+      force =         computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j, debug_this)
+      force = force + computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j + 1, debug_this)
       in_j = (in_r * 2 + 1) * (2*N_theta / level_mult) + in_t * 2
-      force = force + computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j)
-      force = force + computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j + 1)
+      force = force + computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j, debug_this)
+      force = force + computeForcesAtLevel(level-1,level_mult/2, r, theta, in_j + 1, debug_this)
     ELSE
       ! TODO: Implement the cos cache again, using cos/sin is super slow.
       cosvar = cos(theta - theta_p)
@@ -148,6 +174,11 @@ contains
       f_r = (r - r_p*cosvar) * f_mag
       f_t = (r_p*sinvar) * f_mag
       force = COMPLEX(f_r, f_t)
+
+      ! Only turn on for debugging
+      !IF (debug_this) THEN
+      !  call showDebug(in_i, level, level)
+      !END IF
     END IF
   end function computeForcesAtLevel
 

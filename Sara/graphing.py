@@ -106,6 +106,9 @@ dtheta = angles[1]-angles[0]
 # Show local
 #plot2('force_r.data', 'force_theta.data')
 
+# Show debug level
+#plotFile('debug_level.data')
+
 path = '../dephil/data/'
 suffix = '_pure_lvl0.data'
 suffix2 = '_pure_lvl1.data'
