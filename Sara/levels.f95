@@ -68,7 +68,7 @@ program gravity
   ! Compute the mass at level_0
   do out_i=0, (N_r*N_theta)-1
     r = r_prime(out_i/N_theta)
-    mass(out_i) = sigma(out_i)*r*d_rd_theta
+    mass(out_i) = -sigma(out_i)*r*d_rd_theta
   end do
 
   call computeMassAtHigherLevels(N_r, N_theta, level)

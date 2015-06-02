@@ -63,8 +63,8 @@ program ex1
     do in_i=0, (N_r*N_theta)-1 
       r_p = r_prime(in_i/N_theta)                                   ! current r-prime
       theta_p = theta_prime(MODULO(in_i, N_theta))                  ! current theta-prime
-      cosvar = cosCache(MODULO(in_i-out_i, N_theta))  ! no significant change
-      sinvar = sinCache(MODULO(in_i-out_i, N_theta))  ! possibility for optimization?
+      cosvar = cosCache(MODULO(out_i-in_i, N_theta))  ! no significant change
+      sinvar = sinCache(MODULO(out_i-in_i, N_theta))  ! possibility for optimization?
       ! get rid of sinCache everywhere.
       ! sinCache(x) = cosCache(x +- N_t/4), I think
 

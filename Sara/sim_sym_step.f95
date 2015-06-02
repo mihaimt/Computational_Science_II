@@ -62,13 +62,13 @@ program ex1
     do in_i=0, (N_r*N_theta)-1 
       r_p = r_prime(in_i/N_theta)                                   ! current r-prime
       theta_p = theta_prime(MODULO(in_i, N_theta))                  ! current theta-prime
-      cosvar = cosFast(in_i-out_i)                                  ! = cos(theta-theta_prime)
-      sinvar = sinFast(in_i-out_i)                                  ! = sin(theta-theta_prime)
+      cosvar = cosFast(out_i-in_i)                                  ! = cos(theta-theta_prime)
+      sinvar = sinFast(out_i-in_i)                                  ! = sin(theta-theta_prime)
 
       force_denominator = (r2+r_p*r_p-(2*r*r_p*cosvar))
       force_denominator = sqrt(force_denominator*force_denominator*force_denominator)
-      force_mag_temp = (G*sigma(in_i)/(force_denominator)) * d_rd_theta
-      force_r(out_i) = (r - r_p*cosvar) * force_mag_temp + force_r(out_i)
+      force_mag_temp = -(G*sigma(in_i)/(force_denominator)) * d_rd_theta
+      force_r(out_i) = (r - r_p*cosvar) * -force_mag_temp + force_r(out_i)
       force_theta(out_i) = (r_p*sinvar) * force_mag_temp + force_theta(out_i)
     end do
     force_mag(out_i) = sqrt(force_r(out_i)*force_r(out_i) + force_theta(out_i)*force_theta(out_i)) 
