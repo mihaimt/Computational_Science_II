@@ -9,9 +9,9 @@ program gravity
   real, parameter :: pi = 3.1415926538
   integer, parameter :: N_r = 128
   integer, parameter :: N_theta = 256
-  integer, parameter :: min_level = 0
-  integer, parameter :: max_level = 6
-  integer, parameter :: level_mult = 2 ** max_level
+  integer :: min_level = 0
+  integer :: max_level = 6
+  integer :: level_mult 
   real(8), parameter :: eps = 0
   ! run-time variables
   real(8) :: a,r,r2, theta, r_step, t_step, r_p, theta_p, force_mag_temp, surface_area, d_rd_theta, force_denominator
@@ -29,14 +29,35 @@ program gravity
 
  
   !size of the inner loop, assume start at 0
-  integer, parameter :: inner_loop_size = ((N_r / level_mult) * (N_theta / level_mult)) - 1
+  integer :: inner_loop_size
 
   ! temp variables
   integer :: r_lookup
   COMPLEX(8) :: force
 
+  CHARACTER(len=32) :: arg
+
   ! lookup array
   integer,dimension(0:20) :: level_offset_lookup  ! conservatively oversized
+
+  # The first command line parameter will be the max level, the second the min level.
+  if (iargc() > 0) then
+    CALL getarg(1, arg)
+    read(arg, '(i10)') max_level
+  end if
+  if (iargc() > 1) then
+    CALL getarg(2, arg)
+    read(arg, '(i10)') min_level
+  end if
+  print *, "MaxLevel:", max_level
+  print *, "MinLevel:", min_level
+  if (min_level > max_level) then
+    print *, "MaxLevel must be larger or equal to MinLevel"
+    CALL EXIT(1)
+  end if
+
+  level_mult = 2 ** max_level
+  inner_loop_size = ((N_r / level_mult) * (N_theta / level_mult)) - 1
 
   call readFile("r_project.data", r_prime)
   call readFile("theta_project.data", theta_prime)
