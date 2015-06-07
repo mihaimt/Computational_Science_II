@@ -24,8 +24,9 @@ for line in lines:
 
   rgb = line.split(' ')[1]
   rgb = rgb.translate(empty_trans, "()")
-  (r, g, b) = rgb.split(',')
-  color = (float(r) / 255.0 + float(g) / 255.0 + float(b) / 255.0) / 3.0
+  colors = rgb.split(',')
+  color = (float(colors[0]) / 255.0 + float(colors[1]) / 255.0 +
+      float(colors[2]) / 255.0) / 3.0
   color = 0.03 * (1.0 - color)
   print '   %e ' % color
   #print color, r, g, b, rgb, line
