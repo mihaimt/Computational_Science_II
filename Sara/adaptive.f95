@@ -325,7 +325,7 @@ contains
 
           ! Careful here, if the mass(o) is too small, dividing by it can yield very large results that will
           ! over-correct and lead to numerical instability.
-          IF (abs(mass(o)) > 0.0001 * mass_diff_total) THEN
+          IF (abs(mass(o)) > 0.01 * mass_diff_total) THEN
             ! This summation doesn't account for polar coordinates and is therefore at best an
             ! approximation. The error will increase in higher levels as each cell covers a larger arc.
             center_r =            (mass_offset_r(i1) - half_step_r) * mass(i1)
