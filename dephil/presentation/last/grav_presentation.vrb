@@ -1,0 +1,49 @@
+\frametitle{Custom InvSqrt}
+  \lstset{
+    language=[90]Fortran,
+    aboveskip=3mm,
+    belowskip=3mm,
+    showstringspaces=false,
+    columns=fullflexible,
+    basicstyle={\tiny\ttfamily},
+    numbers=none,
+    numberstyle=\small\color{gray},
+    keywordstyle=\color{mauve},
+    commentstyle=\color{dkgreen},
+    stringstyle=\color{blue},
+    breaklines=true,
+    breakatwhitespace=false,
+    tabsize=3
+}
+  \begin{lstlisting}
+   REAL(8) FUNCTION InvSqrt (x)
+    IMPLICIT NONE
+    TYPE casting
+        REAL(8) :: x
+    END TYPE casting
+    REAL(8), INTENT(in) :: x
+    ! casting
+    TYPE(casting), TARGET :: pointerTo
+    ! Encode data as an array of integers
+    INTEGER(8), DIMENSION(:), ALLOCATABLE :: enc
+    INTEGER(8) :: length
+    INTEGER(8) :: magic_number = 6910469410427058089
+    REAL(8) :: xhalf
+    xhalf = .5*x
+    ! transfer to heap
+    pointerTo%x = x
+    ! encode a memory section from a type to other
+    length = size(transfer(pointerTo, enc))
+    allocate(enc(length))
+    ! encoded to integer
+    enc = transfer(pointerTo, enc)  ! evil floating point bit level hacking
+    enc(1) = magic_number - rshift(enc(1),1)  ! wtf! (for int64: 0x5fe6eb50c7b537a9 = 6910469410427058089)
+    ! decode
+    pointerTo = transfer(enc, pointerTo)
+    ! dealloc
+    deallocate(enc)
+
+    InvSqrt = pointerTo%x*(1.5 - xhalf*pointerTo%x*pointerTo%x)
+END FUNCTION InvSqrt
+  \end{lstlisting}
+
