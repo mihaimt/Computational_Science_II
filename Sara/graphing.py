@@ -180,7 +180,7 @@ dtheta = angles[1]-angles[0]
 # Save to a file.
 def save(filename, is2d=True):
   if is2d:
-    suffix = '-polar' if FLAGS.polar else '-euklid'
+    suffix = '-polar' if FLAGS.polar else '-euclid'
     filename = filename.replace('.png', suffix + '.png')
   plt.savefig(os.path.join(FLAGS.prefix, filename))
   print "saved " + filename
