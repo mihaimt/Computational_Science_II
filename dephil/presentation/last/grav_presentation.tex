@@ -92,13 +92,15 @@
   \item things to be learned:
   \begin{itemize}
    \item Fortran
-   \item general programming experience
-   \item code optimization
+   \item General programming experience
+   \item Code optimization
+   \item Balancing speed vs. accuracy
   \end{itemize}
   \item issues:
   \begin{itemize}
-   \item time
-   \item boundary conditions
+   \item Time
+   \item Boundary conditions
+   \item Numerical stability
   \end{itemize}
  \end{itemize}
 \end{frame}
@@ -180,19 +182,21 @@
 \begin{frame}
  \frametitle{Optimization Strategies}
  \begin{itemize}
-  \item Fortran loops are column-major
+  \item Fortran loops are column-major (todo:arrays?)
   \item minimizing loop overhead:
   \begin{itemize}
-   \item avoid subroutine calls in inner loops
-   \item shift operations to outer loops
+   \item Avoid subroutine calls in inner loops
+   \item Reduce repeat evalutions by shifting to outer loops
   \end{itemize}
-  \item loop unrolling
-  \item better programming syntax, e.g. a\textasteriskcentered a instead of a\textasteriskcentered\textasteriskcentered2 (multiplications instead of exponentials and logarithms)
-  \item idea: find faster methods, e.g. invsqrt using bit shifts and Newton iterations (additions and multiplications instead of divisions)
-  \item precalculations of lookup tables for grid given parameters ($cos$, $sin$, $r\_prime$, $theta\_prime$ etc.)
-  \item using symmetries
- \end{itemize}
- \quad $\longrightarrow$ time optimization from 255.950150 to 9.865764 seconds
+  \item Loop unrolling (if compiler optimization doesn't already do it)
+  \item Faster arithmetic operations, e.g. a\textasteriskcentered a instead of a\textasteriskcentered\textasteriskcentered2 (multiplications instead of exponentials and logarithms)
+  \item Idea: find faster methods, e.g. invsqrt using bit shifts and Newton iterations (additions and multiplications instead of divisions)
+  \item Precalculations of lookup tables for grid given parameters ($cos$, $sin$, $r\_prime$, $theta\_prime$ etc.)
+  \item Using symmetries
+ 
+ \item[] $\longrightarrow$ time optimization from 255.95s to 9.87 s (v. 1)
+ \item[] $\longrightarrow$ time optimization from 69.0s to 11.8 s (v. 2)
+\end{itemize}
 \end{frame}
 %---------------------------------------------------------------------
 \begin{frame}
@@ -214,11 +218,16 @@
 \begin{frame}
  \frametitle{Higher levels}
  \begin{itemize}
-  \item reducing operations by using less mass points 
+  \item Reducing operations by using fewer mass points 
   \item $4^{LEVEL}$ cells into 1
-  \item problem: oscillations
-  \item cause: calculation not anymore only at corners of the grid cells
-  \item solution: shift to corner, interpolate the masses and introduce ghost cells
+  \item Problem: oscillations
+  \item Cause: calculation not anymore only at corners of the grid cells
+  \item First solution:
+  \begin{itemize}
+   \item shift to corner
+   \item interpolate the masses
+   \item introduce ghost cells
+  \end{itemize}
  \end{itemize}
  \begin{figure}[H]
   \centering
@@ -228,7 +237,7 @@
 \end{frame}
 %---------------------------------------------------------------------
 \begin{frame}
- \frametitle{Oscillation pattern}
+ \frametitle{Oscillation pattern (TODO: Level 3?)}
  \begin{figure}[H]
   \centering
   \includegraphics[width=.8\textwidth]{radial_force_lvl3.png}
@@ -241,6 +250,10 @@
  \begin{equation*}
   f(x,y) \approx f(0,0)(1-x)(1-y) + f(1,0)x(1-y) + f(0,1)(1-x)y + f(1,1)xy
  \end{equation*}
+ \begin{equation*}
+ f(\alpha,\beta) \approx f(0,0)(1-\alpha)(1-\beta) + f(1,0)\alpha(1-\beta) + f(0,1)(1-\alpha)\beta + f(1,1)\alpha\beta
+  \end{equation*}
+
  \begin{figure}[H]
   \centering
   \includegraphics[width=0.3\textwidth]{bilinear_interpolation_visualisation.png}
@@ -436,6 +449,65 @@
 \end{figure}
 \end{frame}
 %---------------------------------------------------------------------
+\begin{frame}
+ \frametitle{How can we improve this?}
+\begin{itemize}
+  \item Adaptive lookup down to level 0; Based on:
+  \begin{itemize} 
+  \item Distance
+  \item Magnitude of difference in mass of lower level cells
+  \end{itemize}
+ \end{itemize}
+
+ \begin{figure}[H]
+  \centering
+  \includegraphics[width=.4\textwidth]{density.png}     \includegraphics[width=.35\textwidth]{../../../Sara/run/default/debug_level-euclid.png}
+\end{figure}
+\end{frame}
+%---------------------------------------------------------------------
+\begin{frame}
+ \frametitle{Result}
+\begin{itemize}
+  \item Simulation time: approx. 4s
+  \item Error bound: less than 4.5 percent at peaks
+  \item Oscillation patterns still exist
+ \end{itemize}
+
+ \begin{figure}[H]
+  \centering
+  \includegraphics[width=.5\textwidth]{../../../Sara/run/default/forcesA-euclid.png}     \includegraphics[width=.5\textwidth]{../../../Sara/run/default/diff_1D.png}
+\end{figure}
+\end{frame}
+%---------------------------------------------------------------------
+\begin{frame}
+ \frametitle{More about adaptive Code - 1}
+\begin{itemize}
+  \item item1
+  \item item2
+  \item item3
+ \end{itemize}
+
+ \begin{figure}[H]
+  \centering
+  \includegraphics[width=.5\textwidth]{../../../Sara/run/default/forcesA-euclid.png}     \includegraphics[width=.5\textwidth]{../../../Sara/run/default/diff_1D.png}
+\end{figure}
+\end{frame}
+%---------------------------------------------------------------------
+\begin{frame}
+ \frametitle{More about adaptive Code - 2}
+\begin{itemize}
+  \item item1
+  \item item2
+  \item item3
+ \end{itemize}
+
+ \begin{figure}[H]
+  \centering
+  \includegraphics[width=.5\textwidth]{../../../Sara/run/default/forcesA-euclid.png}     \includegraphics[width=.5\textwidth]{../../../Sara/run/default/diff_1D.png}
+\end{figure}
+\end{frame}
+%---------------------------------------------------------------------
+
 \begin{frame}
  \frametitle{Thanks for listening!}
  \begin{center}
