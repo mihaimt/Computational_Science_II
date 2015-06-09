@@ -449,38 +449,50 @@
 \end{figure}
 \end{frame}
 %---------------------------------------------------------------------
+
 \begin{frame}
  \frametitle{How can we improve this?}
 \begin{itemize}
-  \item Adaptive lookup down to level 0; Based on:
-  \begin{itemize} 
-  \item Distance
-  \item Magnitude of difference in mass of lower level cells
+  \item Let's look at another strategy with an \textbf{adaptive lookup}
+  \begin{itemize}
+  \item Increase level range [0,5]
+  \item Use distance to determine lookup level
   \end{itemize}
  \end{itemize}
 
  \begin{figure}[H]
   \centering
-  \includegraphics[width=.4\textwidth]{density.png}     \includegraphics[width=.35\textwidth]{../../../Sara/run/default/debug_level-euclid.png}
+  \includegraphics[width=.5\textwidth]{../../../Sara/plots/adaptive_lookup.png}     \includegraphics[width=.45\textwidth]{../../../Sara/run/default/debug_level-euclid.png}
 \end{figure}
 \end{frame}
 %---------------------------------------------------------------------
 \begin{frame}
- \frametitle{Result}
-\begin{itemize}
-  \item Simulation time: approx. 4s
-  \item Error bound: less than 4.5 percent at peaks
-  \item Oscillation patterns still exist
- \end{itemize}
-
- \begin{figure}[H]
-  \centering
-  \includegraphics[width=.5\textwidth]{../../../Sara/run/default/forcesA-euclid.png}     \includegraphics[width=.5\textwidth]{../../../Sara/run/default/diff_1D.png}
-\end{figure}
+ \frametitle{Three Optimization Steps}
+  \begin{enumerate}
+  
+  \item Adaptive Lookup:
+  \begin{itemize}
+     \item[•] Increase levels with distance
+  \end{itemize}
+  
+  \item Lookup Refinement by mass-spread:
+  \begin{itemize}
+     \item[•] For higher level cells, the distribution of mass at level 0 cells is an indicator for the accuracy of the higher level cells.
+     \item[•] Measure "spread" as difference between max and min of level 0 masses of the cell.
+     \item[•] User lower levels if cell "spread" is larger than an arbitrary predefined value.
+     \item[•] This value has huge performance over accuracy implications.
+  \end{itemize} 
+  
+  \item Centre of Mass: Correction
+  \begin{itemize}
+     \item[•] Centre of mass usually is not at the centre of cell
+  \end{itemize}
+  
+  \end{enumerate}  
 \end{frame}
 %---------------------------------------------------------------------
 \begin{frame}
- \frametitle{More about adaptive Code - Centre of Mass Compensation}
+ \frametitle{More about adaptive Code - Centre of Mass Correction}
 \begin{itemize}
   \item A cell's centre of mass can vary wildly as the levels increase
  \end{itemize}
@@ -491,7 +503,7 @@
 \end{frame}
 %---------------------------------------------------------------------
 \begin{frame}
- \frametitle{More about adaptive Code - Centre of Mass Compensation}
+ \frametitle{More about adaptive Code - Centre of Mass Correction}
 \begin{itemize}
   \item Correcting for the centre of mass
  \end{itemize}
@@ -506,7 +518,7 @@
 \end{frame}
 %---------------------------------------------------------------------
 \begin{frame}
- \frametitle{More about adaptive Code - Centre of Mass Compensation}
+ \frametitle{More about adaptive Code - Centre of Mass Correction}
 \begin{itemize}
   \item Correcting for the centre of mass
  \end{itemize}
@@ -516,22 +528,75 @@
 \end{figure}
 \begin{itemize}
   \item Improvement: error reduction from 1.8\% $\rightarrow$ 1.4\% in the radial component
-  \item Carthesian math is an approximation, might work better in polar coordinates?
+  \item Further Work: Carthesian math is an approximation, should work better in polar coordinates?
  \end{itemize}
 \end{frame}
 %---------------------------------------------------------------------
+
+%---------------------------------------------------------------------
 \begin{frame}
- \frametitle{More about adaptive Code - 2}
+ \frametitle{Result}
 \begin{itemize}
-  \item item1
-  \item item2
-  \item item3
+  \item Simulation time: Level 0: 11s, Level 5-0: 4s
+  \item Error bound: \textless 2\% at peaks
+  \item Oscillation patterns still exist
  \end{itemize}
 
  \begin{figure}[H]
   \centering
   \includegraphics[width=.5\textwidth]{../../../Sara/run/default/forcesA-euclid.png}     \includegraphics[width=.5\textwidth]{../../../Sara/run/default/diff_1D.png}
 \end{figure}
+\end{frame}
+
+%---------------------------------------------------------------------
+\begin{frame}
+ \frametitle{Results - Relative Diff with Level 0 vs. Adaptive}
+\begin{itemize}
+  \item MSE is quite small
+  \begin{itemize}
+    \item Large areas have almost no error
+  \end{itemize}
+  \item Problem: Oscillations still exist
+  \item Huge error spike in COM correction (lower MSE @ 0.000012)
+ \end{itemize}
+
+ \begin{figure}[H]
+  \centering
+  \includegraphics[width=.7\textwidth]{../../../Sara/run/default/diff_2D-euclid.png} 
+
+\end{figure}
+\end{frame}
+%---------------------------------------------------------------------
+
+
+
+\begin{frame}
+ \frametitle{Future Work with Adaptive Approach}
+
+
+	\begin{itemize}
+  		\item Address oscillations
+  		\begin{itemize}
+    			\item Bilinear interpolation with ghost cells
+    			\item Overlaping adaptive higher levels
+  		\end{itemize}
+  		\item Address centre of mass correction errors
+  		\begin{itemize}
+    			\item Address spikes (not just by increasing epsilon )
+    			\item Polar-corrected approximation of centre of mass
+  		\end{itemize}
+	\end{itemize}
+
+
+
+
+
+ \begin{figure}[H]
+  \centering
+  \includegraphics[width=.5\textwidth]{../../../Sara/run/default/diff_2D-polar.png} 
+
+ \end{figure}
+  
 \end{frame}
 %---------------------------------------------------------------------
 
@@ -611,4 +676,7 @@ END FUNCTION InvSqrt
   \end{lstlisting}
 
 \end{frame}
+%---------------------------------------------------------------------
+
+
 \end{document}
