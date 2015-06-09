@@ -136,68 +136,7 @@
 %   for $r(N\_r)$, $theta(N\_theta)$, $sigma(N\_r,N\_theta)$, $dr(N\_r)$ and $dtheta(N\_theta)$
 % \end{frame}
 %---------------------------------------------------------------------
-\begin{frame}[fragile]
-  \frametitle{Simple Implementation}
-  \lstset{
-    language=[90]Fortran,
-    aboveskip=3mm,
-    belowskip=3mm,
-    showstringspaces=false,
-    columns=fullflexible,
-    basicstyle={\tiny\ttfamily},
-    numbers=none,
-    numberstyle=\small\color{gray},
-    keywordstyle=\color{mauve},
-    commentstyle=\color{dkgreen},
-    stringstyle=\color{blue},
-    breaklines=true,
-    breakatwhitespace=false,
-    tabsize=3
-}
-      
-  \begin{lstlisting}
-  
-    ! write force components for every corner in grid
-    do i = 1, N_r
-        r_i = r(i)-.5*dr(i) ! shift r to the corners
-        do j = 1, N_theta
-            theta_j = theta(j)-.5*dtheta(j) ! shift theta to the corners
-            ! sum up the forces onto the point (i, j)
-            do iprime = 1, N_r
-                do jprime = 1, N_theta
-                    force_point = -sigma(iprime,jprime)*r(iprime)*dr(iprime)*dtheta(jprime)/(r_i**2+r(iprime)**2-2.*r_i*r(iprime)*cos(theta_j-theta(jprime)))**(1.5)
-                    f_r = f_r + force_point * (r_i-r(iprime)*cos(theta_j-theta(jprime)))
-                    f_theta = f_theta + force_point * r(iprime)*sin(theta_j-theta(jprime))
-                end do
-            end do
-        write(11, '(e20.10)') f_r
-        write(12, '(e20.10)') f_theta
-        f_r = 0.
-        f_theta = 0.
-        end do
-    end do
-  \end{lstlisting}
-\end{frame}
-%---------------------------------------------------------------------
-\begin{frame}
- \frametitle{Optimization Strategies}
- \begin{itemize}
-  \item Fortran loops are column-major (todo:arrays?)
-  \item minimizing loop overhead:
-  \begin{itemize}
-   \item Avoid subroutine calls in inner loops
-   \item Reduce repeat evalutions by shifting to outer loops
-  \end{itemize}
-  \item Loop unrolling (if compiler optimization doesn't already do it)
-  \item Faster arithmetic operations, e.g. a\textasteriskcentered a instead of a\textasteriskcentered\textasteriskcentered2 (multiplications instead of exponentials and logarithms)
-  \item Idea: find faster methods, e.g. invsqrt using bit shifts and Newton iterations (additions and multiplications instead of divisions)
-  \item Precalculations of lookup tables for grid given parameters ($cos$, $sin$, $r\_prime$, $theta\_prime$ etc.)
-  \item Using symmetries
- 
- \item[] $\longrightarrow$ time optimization from 255.95s to 9.87 s (v. 1)
- \item[] $\longrightarrow$ time optimization from 69.0s to 11.8 s (v. 2)
-\end{itemize}
-\end{frame}
+
 %---------------------------------------------------------------------
 \begin{frame}
  \frametitle{Density map}
@@ -215,6 +154,29 @@
  \end{figure} 
 \end{frame}
 %---------------------------------------------------------------------
+\begin{frame}
+ \frametitle{Optimization Strategies}
+ \begin{itemize}
+  \item Fortran array are column-major
+  \item minimizing loop overhead:
+  \begin{itemize}
+   \item Avoid subroutine calls in inner loops
+   \item Reduce repeat evalutions by shifting to outer loops
+  \end{itemize}
+  \item Loop unrolling (if compiler optimization doesn't already do it)
+  \item Faster arithmetic operations, e.g. a\textasteriskcentered a instead of a\textasteriskcentered\textasteriskcentered2 (multiplications instead of exponentials and logarithms)
+  \item Ideas: find faster methods, e.g. invsqrt using bit shifts and Newton iterations (additions and multiplications instead of divisions), use $cos$ and $sin$ identities to reduce lookup.
+  \item Precalculations of lookup tables for grid given parameters ($cos$, $sin$, $r\_prime$, $theta\_prime$ etc.)
+  \item Using symmetries
+ 
+ \item[] $\longrightarrow$ time optimization from 255.95s to 9.87 s (v. 1)
+ \item[] $\longrightarrow$ time optimization from 69.0s to 11.8 s (v. 2)
+\end{itemize}
+\end{frame}
+%---------------------------------------------------------------------
+
+
+
 \begin{frame}
  \frametitle{Higher levels}
  \begin{itemize}
@@ -236,8 +198,9 @@
 \end{figure}
 \end{frame}
 %---------------------------------------------------------------------
+%---------------------------------------------------------------------
 \begin{frame}
- \frametitle{Oscillation pattern (TODO: Level 3?)}
+ \frametitle{Oscillation pattern (Level 3)}
  \begin{figure}[H]
   \centering
   \includegraphics[width=.8\textwidth]{radial_force_lvl3.png}
@@ -250,9 +213,6 @@
  \begin{equation*}
   f(x,y) \approx f(0,0)(1-x)(1-y) + f(1,0)x(1-y) + f(0,1)(1-x)y + f(1,1)xy
  \end{equation*}
- \begin{equation*}
- f(\alpha,\beta) \approx f(0,0)(1-\alpha)(1-\beta) + f(1,0)\alpha(1-\beta) + f(0,1)(1-\alpha)\beta + f(1,1)\alpha\beta
-  \end{equation*}
 
  \begin{figure}[H]
   \centering
@@ -466,6 +426,15 @@
 \end{figure}
 \end{frame}
 %---------------------------------------------------------------------
+%---------------------------------------------------------------------
+\begin{frame}
+ \frametitle{Density map}
+ \begin{figure}[H]
+  \centering
+  \includegraphics[width=.8\textwidth]{density.png}
+ \end{figure} 
+\end{frame}
+%------------------------
 \begin{frame}
  \frametitle{Three Optimization Steps}
   \begin{enumerate}
@@ -539,7 +508,7 @@
 \begin{itemize}
   \item Simulation time: Level 0: 11s, Level 5-0: 4s
   \item Error bound: \textless 2\% at peaks
-  \item Oscillation patterns still exist
+  \item Error patterns still exist
  \end{itemize}
 
  \begin{figure}[H]
@@ -556,7 +525,7 @@
   \begin{itemize}
     \item Large areas have almost no error
   \end{itemize}
-  \item Problem: Oscillations still exist
+  \item Problem: Some error patterns still exist (higher values?)
   \item Huge error spike in COM correction (lower MSE @ 0.000012)
  \end{itemize}
 
@@ -575,7 +544,7 @@
 
 
 	\begin{itemize}
-  		\item Address oscillations
+  		\item Address errors
   		\begin{itemize}
     			\item Bilinear interpolation with ghost cells
     			\item Overlaping adaptive higher levels
@@ -585,7 +554,11 @@
     			\item Address spikes (not just by increasing epsilon )
     			\item Polar-corrected approximation of centre of mass
   		\end{itemize}
+  		\item Many early errors in "array arithmetic"
+\begin{itemize}  		
+  		\item Create an array API as a container?
 	\end{itemize}
+\end{itemize}
 
 
 
@@ -610,6 +583,52 @@
 % Supplementary slides
 % if there's enough time or we need to fill time...
 %---------------------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{Simple Implementation}
+  \lstset{
+    language=[90]Fortran,
+    aboveskip=3mm,
+    belowskip=3mm,
+    showstringspaces=false,
+    columns=fullflexible,
+    basicstyle={\tiny\ttfamily},
+    numbers=none,
+    numberstyle=\small\color{gray},
+    keywordstyle=\color{mauve},
+    commentstyle=\color{dkgreen},
+    stringstyle=\color{blue},
+    breaklines=true,
+    breakatwhitespace=false,
+    tabsize=3
+}
+      
+  \begin{lstlisting}
+  
+    ! write force components for every corner in grid
+    do i = 1, N_r
+        r_i = r(i)-.5*dr(i) ! shift r to the corners
+        do j = 1, N_theta
+            theta_j = theta(j)-.5*dtheta(j) ! shift theta to the corners
+            ! sum up the forces onto the point (i, j)
+            do iprime = 1, N_r
+                do jprime = 1, N_theta
+                    force_point = -sigma(iprime,jprime)*r(iprime)*dr(iprime)*dtheta(jprime)/(r_i**2+r(iprime)**2-2.*r_i*r(iprime)*cos(theta_j-theta(jprime)))**(1.5)
+                    f_r = f_r + force_point * (r_i-r(iprime)*cos(theta_j-theta(jprime)))
+                    f_theta = f_theta + force_point * r(iprime)*sin(theta_j-theta(jprime))
+                end do
+            end do
+        write(11, '(e20.10)') f_r
+        write(12, '(e20.10)') f_theta
+        f_r = 0.
+        f_theta = 0.
+        end do
+    end do
+  \end{lstlisting}
+\end{frame}
+
+%---------------------------------------------------------------------
+
+
 \begin{frame}
  \frametitle{Results for Level 1 with refinement}
  \begin{figure}[H]
