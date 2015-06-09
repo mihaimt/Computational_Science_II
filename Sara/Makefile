@@ -1,6 +1,6 @@
 # Tuning parameters.
 MASS_DIFF_P="0.2"
-COM_CORR="com" # turn on with 'com'
+COM_CORR="" # turn on with 'com', wasn't working
 
 # All test files
 testinput := $(shell find 'testinput' -name '*.png')

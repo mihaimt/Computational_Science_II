@@ -8,7 +8,7 @@ PROGRAM gravity
   INTEGER :: min_level = 0
   INTEGER :: max_level = 6
   INTEGER :: level_mult 
-  REAL(8), PARAMETER :: eps = 1e-6
+  REAL(8) :: eps = 0
   ! run-time variables
   REAL(8) :: a,r,r2, theta, r_step, t_step, force_mag_temp, surface_area, d_rd_theta, force_denominator
   REAL(8) :: mass_diff_threshold, mass_diff_percentage, mass_diff_total
@@ -24,7 +24,6 @@ PROGRAM gravity
   ! iterator variables
   INTEGER :: out_i, in_i, theta_i
 
-
   !size of the inner loop, assume start at 0
   INTEGER :: inner_loop_size
 
@@ -37,14 +36,15 @@ PROGRAM gravity
   ! lookup array
   INTEGER,DIMENSION(0:20) :: level_offset_lookup  ! conservatively oversized
 
+  ! debug_value -1.0 unset|
   debug_value(:) = -1.0
 
-  ! The first command line parameter will be the max level
+  ! The first command line parameter will be the max level (ex: 6)
   IF (iargc() > 0) THEN
     CALL getarg(1, arg)
     READ(arg, '(i10)') max_level
   END IF
-  ! The second command line parameter will be the min level
+  ! The second command line parameter will be the min level (ex: 0)
   IF (iargc() > 1) THEN
     CALL getarg(2, arg)
     READ(arg, '(i10)') min_level
@@ -55,8 +55,12 @@ PROGRAM gravity
     PRINT *, "MaxLevel must be larger or equal to MinLevel"
     CALL EXIT(1)
   END IF
+  IF (min_level > 0) THEN
+    eps = 1e-6
+  END IF
 
-  ! The third command line parameter will be the mass difference threshold
+
+  ! The third command line parameter will be the mass difference threshold (ex: 0.2, [0,1])
   IF (iargc() > 2) THEN
     CALL getarg(3, arg)
     READ(arg, *) mass_diff_percentage
@@ -68,6 +72,7 @@ PROGRAM gravity
   END IF
 
   com_correction = .FALSE.
+  ! The fourth command line paramter will turn on COM correction
   IF (iargc() > 3) THEN
     CALL getarg(4, arg)
     IF (arg == "com") THEN
@@ -101,7 +106,6 @@ PROGRAM gravity
   CALL computeLevelOffsets(level_offset_lookup)
  
   CALL CPU_TIME(t_init)
-
 
   CALL computeMassAtLevel0()
   CALL computeMassAtHigherLevels(N_r, N_theta, max_level)
@@ -233,7 +237,7 @@ contains
         t_p = t_p + mass_offset_t(mass_lookup)
       END IF
       ! The cosine cache might still be a very nice optimization, unfortunately with the center of mass
-      ! correction all theta differences might be unique, at which point a cache is completely useless.
+      ! correction all th_ta differences might be unique, at which point a cache is completely useless.
       cosvar = cos(theta - t_p)
       sinvar = sin(theta - t_p)
 
@@ -305,10 +309,12 @@ contains
         
       DO r = 0, out_N_r-1
         DO t = 0, out_N_t-1
+          ! READ indices: calculation of indices of children cells
           i1 = (offset_in + 2 * t    ) + (in_N_t * (2 * r    ))
           i2 = (offset_in + 2 * t + 1) + (in_N_t * (2 * r    ))
           i3 = (offset_in + 2 * t    ) + (in_N_t * (2 * r + 1))
           i4 = (offset_in + 2 * t + 1) + (in_N_t * (2 * r + 1))
+          ! Write index
           o = offset_out + t + out_N_t * r
           mass(o) = mass(i1) + mass(i2) + mass(i3) + mass(i4)
           
@@ -323,11 +329,11 @@ contains
 
           ! Compute the location of the center of mass of the aggregated cell.
 
-          ! Careful here, if the mass(o) is too small, dividing by it can yield very large results that will
-          ! over-correct and lead to numerical instability.
+          ! Careful here, if the mass(o) is too small/close to zero, dividing by it can yield very large 
+          ! results that will over-correct and lead to numerical instability.
           IF (abs(mass(o)) > 0.01 * mass_diff_total) THEN
             ! This summation doesn't account for polar coordinates and is therefore at best an
-            ! approximation. The error will increase in higher levels as each cell covers a larger arc.
+            ! approximation. The error will increase in higher levels as each cell covers a larger arc...
             center_r =            (mass_offset_r(i1) - half_step_r) * mass(i1)
             center_r = center_r + (mass_offset_r(i2) - half_step_r) * mass(i2)
             center_r = center_r + (mass_offset_r(i3) + half_step_r) * mass(i3)
@@ -367,7 +373,6 @@ contains
     end = cur_size
     DO i=0, level
       write(filename, "(A11,I0.2,A4)") "mass_", i, ".txt"
-      !PRINT *, filename
       CALL writeFilePartly(filename, mass, begin, end)
       begin = end + 1
       cur_size = cur_size / 4
@@ -390,7 +395,7 @@ contains
     CLOSE(8)
   END SUBROUTINE readFile
 
-  ! write subset of the array
+  ! write subset of the array to filename
   SUBROUTINE writeFilePartly(filename, x, begin, end)
     CHARACTER(*) :: filename
     REAL(8) :: x(:)
